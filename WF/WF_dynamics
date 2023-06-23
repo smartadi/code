@@ -1,0 +1,136 @@
+# Need data to be zero mean and scaled???
+
+# Stochastic algorithm 3
+
+import numpy as np
+import scipy as sc
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from sklearn import datasets  # to retrieve the iris Dataset
+import pandas as pd  # to load the dataframe
+from sklearn.preprocessing import StandardScaler  # to standardize the features
+from sklearn.decomposition import PCA  # to apply PCA
+import seaborn as sns  # to plot the heat maps#float32
+import control
+
+# ID
+from __future__ import division
+
+from past.utils import old_div
+
+# Checking path to access other files
+try:
+    from sippy import *
+except ImportError:
+    import sys, os
+
+    sys.path.append(os.pardir)
+    from sippy import *
+
+import numpy as np
+from sippy import functionset as fset
+from sippy import functionsetSIM as fsetSIM
+import matplotlib.pyplot as plt
+
+
+
+# Load spike data
+WF_data = np.load('../data/data_WF_PCA_projections_small.npy')
+print(WF_data.shape)
+WF_data_r = WF_data[:20,:]
+
+
+# Hankel Matrices i>n and j -> \infty
+def Hankel(data, h, w):
+    p = data.shape[0]
+    J = w  # 500
+    I = h  # double
+    Y = np.empty([2 * I * p, J])
+
+    for i in range(2 * I):
+        Y[i * (p):(i + 1) * p, :] = data[:, i:J + i]
+
+    print(Y.shape)
+    return Y
+
+def Project(A,B):
+    return A@B.T@np.linalg.pinv(B@B.T)@B
+
+
+p = WF_data_r.shape[0]
+I = 500
+J = 2000
+Y = Hankel(WF_data_r,I,J)
+Yp = Y[:I*p,:]
+Yf = Y[I*p:,:]
+
+Ypp = Y[:(I+1)*p,:]
+yff = Y[(I+1)*p:,:]
+print(Yp.shape)
+print(Yf.shape)
+print(Ypp.shape)
+print(yff.shape)
+
+
+Oi = Project(Yf,Yp)
+oi = Project(yff,Ypp)
+
+
+print(s.shape)
+fig, ax = plt.subplots()
+ax.plot(s)
+
+ax.set(xlabel='rank', ylabel='S',
+       title='Singular values')
+plt.show()
+
+
+
+r = 30
+U_r = U[:,:r]
+S_r = np.diag(s[:r,])
+
+
+Gi = U_r@sc.linalg.sqrtm(S_r)
+gi = Gi[:-p,:]
+Xhat = np.linalg.pinv(Gi)@Oi
+XXhat = np.linalg.pinv(gi)@oi
+Yi = Yf[:p,:]
+
+
+A = XXhat@np.linalg.pinv(Xhat)
+print(A.shape)
+C = Yi@np.linalg.pinv(Xhat)
+print(C.shape)
+
+
+
+rho_w = XXhat - A@Xhat
+rho_v = Yi - C@Xhat
+rho =  np.concatenate((rho_w, rho_v), axis=0)
+print(rho.shape)
+Cov = np.cov(rho)
+print(Cov.shape)
+
+
+Q = Cov[:30,:30]
+R = Cov[-20:,-20:]
+SS = Cov[:30,-20:]
+print(SS.shape)
+
+
+# orignal data projected
+t = 500
+time = np.linspace(1, t, t)
+neurons = np.linspace(1, p, p)
+T, N = np.meshgrid(time, neurons)
+
+fig = plt.figure(figsize = (12,10))
+ax = plt.axes(projection='3d')
+
+surf = ax.plot_surface(T, N, WF_data_r[:,0:t], cmap = plt.cm.cividis)
+
+
+fig.colorbar(surf, shrink=0.5, aspect=8)
+
+plt.show()

@@ -3,5 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/PyDMD" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/PyRCN" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Time-series-classification-and-clustering-with-Reservoir-Computing" vcs="Git" />
   </component>
 </project>
