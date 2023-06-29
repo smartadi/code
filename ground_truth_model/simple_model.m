@@ -59,26 +59,26 @@ plot(x(1,:),x(2,:))
 P 
 J
 %%
-x0 = [1,1,0,0]';
+x0 = [1,1,1,0]';
 
-x = x0; 
+xx = x0; 
 t = 0:dt:dt*N;
 Cc=[];
 U=[];
 j = 1;
-for i = t
+for i = 1:N
     
-    Cc = [Cc, At^(j-1)*Bt];
-    u = -K*x(:,end);
+    Cc = [Cc, P*J^(i)*inv(P)*Bt];
+    uu = -K*xx(:,end);
     %u = [0;0];
-    U = [u;U];
+    U = [uu;U];
 %     x = [x,inv(P)*expm(J*i)*P*x0 + Cc*U];
-    x = [x,inv(P)*J^(i)*P*x0 + Cc*U];
-    j = j+1;
+    xx = [xx,P*J^(i)*inv(P)*x0 + Cc*U];
 end
 
 %%
 figure()
-plot(x(1,:),x(2,:))
+plot(xx(1,:),xx(2,:))
 
-P*expm(J*i)*inv(P)*x0
+
+

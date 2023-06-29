@@ -7,12 +7,7 @@ clc;
 
 t = 0:0.1:100;
 
-% x0=1;
-% phi = 0.1;
-% x = x0*exp(lambda*t);
-% 
-% figure()
-% plot(t,x)
+
 %% Generate basis
 
 n = 20;
@@ -39,7 +34,7 @@ end
 
 [Q1 R1] =qr(V);
 %%
-Q1(:,1)'*Q1(:,2);
+
 %% EigV of random symmetric matrix (orthogonal eigenvalues)
 % 
 A = rand(n);
@@ -227,10 +222,14 @@ NP = full(sprand(n/2,n,1));
 % AA = Vnew*Dnew*Vnew';
 %%
 % AAA = A*Dnew*inv(A);
+B = full(sprand(n,n,1));
 
-Anew = A*Dnew*inv(A);
-Amix = A*EPS*Dnew*inv(A);
+det(B)
+% Anew = B*Dnew*inv(B);
+% Amix = B*EPS*Dnew*inv(B);
 
+
+% non orthogonal eigenvectors cause mixing 
 Anew = Q1*Dnew*inv(Q1);
 Amix = EPS*Q1*Dnew*inv(Q1);
 
@@ -268,19 +267,24 @@ for i = t
 end
     ywf = WF*xpf;
     ynp = NP*xpf;
+
 figure()
 plot(t,xp);
+title('x')
 
 figure()
 plot(t,xpf);
+title('x mixed fast and slow')
 
 
 figure()
 plot(t,ywf);
+title('output WF')
 
 figure()
 plot(t,ynp);
+title('output NP')
 
+%%
 
-
-subplot()
+[v d] = eig(Anew)

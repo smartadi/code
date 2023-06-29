@@ -7,12 +7,7 @@ clc;
 
 t = 0:0.1:100;
 
-% x0=1;
-% phi = 0.1;
-% x = x0*exp(lambda*t);
-% 
-% figure()
-% plot(t,x)
+
 %% Generate basis
 
 n = 20;
@@ -39,7 +34,7 @@ end
 
 [Q1 R1] =qr(V);
 %%
-Q1(:,1)'*Q1(:,2);
+
 %% EigV of random symmetric matrix (orthogonal eigenvalues)
 % 
 A = rand(n);
@@ -83,7 +78,7 @@ x0 = 0.5 - rand(n,1);
 % %% Fast and Slow
 % 
 % % change E to E2
-eps = 100;
+eps = 10;
 EPS = [eye(n/2),zeros(n/2,n/2);
     zeros(n/2,n/2),1/eps*eye(n/2)];
 % 
@@ -107,9 +102,8 @@ EPS = [eye(n/2),zeros(n/2,n/2);
 % plot(t,y)
 % title('output with fast and slow modes')
 %% Mix and Match 
-
-WF = rand(n/2,n);
-NP = rand(n/2,n);
+WF = full(sprand(n/2,n,1));
+NP = full(sprand(n/2,n,1));
 %% Non-Orthogonal modes
 
 % B2 = E2*D*E2';
@@ -225,17 +219,19 @@ NP = rand(n/2,n);
 % generate blk diag from
 [Vnew Dnew] = cdf2rdf(Q1,D);
 
-AA = Vnew*Dnew*Vnew';
+% AA = Vnew*Dnew*Vnew';
 %%
-AAA = A*Dnew*inv(A);
+% AAA = A*Dnew*inv(A);
 
-Anew = A*Dnew*inv(A);
-Amix = A*EPS*Dnew*inv(A);
+% Anew = A*Dnew*inv(A);
+% Amix = A*EPS*Dnew*inv(A);
 
-Anew2 = Q1*Dnew*inv(Q1);
-Amix2 = Q1*EPS*Dnew*inv(Q1);
 
-[VV,DD] = eig(AAA);
+% non orthogonal eigenvectors cause mixing 
+Anew = Q1*Dnew*inv(Q1);
+Amix = EPS*Q1*Dnew*inv(Q1);
+
+% [VV,DD] = eig(AAA);
 %%
 
 % AAf = EPS*AAA;
@@ -269,16 +265,25 @@ for i = t
 end
     ywf = WF*xpf;
     ynp = NP*xpf;
+
 figure()
 plot(t,xp);
+title('x')
 
 figure()
 plot(t,xpf);
+title('x mixed fast and slow')
 
 
 figure()
 plot(t,ywf);
+title('output WF')
 
 figure()
 plot(t,ynp);
+title('output NP')
 
+%%
+
+A = full(sprand(n,n,1));
+A = A
