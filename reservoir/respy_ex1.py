@@ -48,22 +48,17 @@ print(WF_data[:,0])
 
 WF_data_scaled = WF_data / np.linalg.norm(WF_data,2,0)
 
-
 fig = plt.figure(figsize=(12,10))
 plt.plot(np.arange(0, 1000), WF_data_scaled[:, :1000].T, label="Training data")
 plt.show()
-
 
 WF_trainX = WF_data_scaled[:10,:1000]
 WF_trainY = WF_data_scaled[:10,1:1001]
 print(WF_trainX.shape)
 print(WF_trainY.shape)
 
-
 WF_testX = WF_data_scaled[:10,1000:2000]
 WF_testY = WF_data_scaled[:10,1001:2001]
-
-
 
 print(WF_testX.shape)
 print(WF_testY.shape)
