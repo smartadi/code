@@ -67,7 +67,6 @@ for i = 1:t
         CC = [CC,c];
     end
         H = [H;CC];
-        
 end
 %%
     cvx_begin 

@@ -1,8 +1,7 @@
 clear all;
 close all;
 clc;
-s = 5;
-rng(s);
+
 % lambda = - 0 - 5i;
 
 
@@ -271,51 +270,6 @@ for i = t
 end
     ywf = WF*xpf;
     ynp = NP*xpf;
-% figure()
-% plot(t,xp);
-% title("latent dynamics")
-% 
-% figure()
-% plot(t,xpf);
-% title("latent dynamics time scaled")
-% 
-% figure()
-% plot(t,ywf);
-% title("WF output")
-% 
-% figure()
-% plot(t,ynp);
-% title("NP output")
-
-%% Eigen Decomposition
-[Un,Dn] = eig(Anew);
-[Um,Dm] = eig(Amix);
-
-
-%% Add high freq noise
-close all;
-xp=[];
-xpf=[];
-f = 5;
-Cn =[];
-Cm =[];
-V =[];
-f = 10*rand(n,1);
-amp = 0.01*rand(n,1);
-
-phi = 3.14*rand(n,1);
-for i = t
-    Cn  = [Cn, Un*Dn^(i)*Un'];
-    Cm  = [Cm, Um*Dm^(i)*Um'];
-    v   = amp.*sin(f*i+phi);
-    V = [v;V];
-    xp  = [xp,expm(Anew*i)*x0 + Cn*V];
-    xpf = [xpf,expm(Amix*i)*x0 + Cm*V];
-end
-V = reshape(V,20,length(t));
-ywf = WF*xpf;
-ynp = NP*xpf;
-
 figure()
 plot(t,xp);
 title("latent dynamics")
@@ -332,7 +286,35 @@ figure()
 plot(t,ynp);
 title("NP output")
 
+
+%% Add high freq noise
+close all;
+xp=[];
+xpf=[];
+f = 150;
+phi = randn(1,)
+for i = t
+    Cc  = [Cc, P*J^(i)*inv(P)];
+    v   = 0.1*sin(f*t+phi);
+    V = [v;V];
+    xp  = [xp,expm(Anew*i)*x0 + Cc*V];
+    xpf = [xpf,expm(Amix*i)*x0 + Cc*V];
+end
+    ywf = WF*xpf;
+    ynp = NP*xpf;
 figure()
-plot(t,V)
-title("noise")
+plot(t,xp);
+title("latent dynamics")
+
+figure()
+plot(t,xpf);
+title("latent dynamics time scaled")
+
+figure()
+plot(t,ywf);
+title("WF output")
+
+figure()
+plot(t,ynp);
+title("NP output")
 
