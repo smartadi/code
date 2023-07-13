@@ -4,8 +4,9 @@ clc;
 s = 5;
 rng(s);
 % lambda = - 0 - 5i;
+digits(8);
 
-
+US = double(table2array(readtable("data/data_WF_US_small.csv")));
 t = 0:0.1:100;
 
 % x0=1;
@@ -225,7 +226,7 @@ NP = full(sprand(n/2,n,1));
 % generate blk diag from
 [Vnew Dnew] = cdf2rdf(Q1,D);
 
-% AA = Vnew*Dnew*Vnew';
+AA = Vnew*Dnew*Vnew';
 %%
 % AAA = A*Dnew*inv(A);
 
@@ -336,19 +337,23 @@ figure()
 plot(t,V)
 title("noise")
 %%
-T = 100;
-N = 100;
 
-Q = eye(n);
-R = eye(n);
+%%
+T = 100;
+N = 10;
+
+% Q = 0.01*eye(n);
+Q = Um(:,1)*Um(:,1)';
+R = 1*eye(n);
 I = eye(N);
 G = [];
 F = [];
+QN = kron(I,Q);
+RN = kron(I,R);
 X0=x0;
 for i = 1:N
     F = [F;Um*Dm^(i)*Um'];
-    QN = kron(I,Q);
-    RN = kron(I,R);
+    
     
     cc=[];
     for j = 1:N
@@ -365,15 +370,15 @@ end
 
     cvx_begin 
         variable B(n*(N))
-        minimize ((F*X0 + G*B)'*QN*(F*X0 + G*B) + B'*RN*B) + U*S*
+        minimize ((F*X0 + G*B)'*QN*(F*X0 + G*B) + B'*RN*B) 
         subject to
-        for i = 1:N
-            
-        end
+%         for i = 1:N
+%             
+%         end
         
     cvx_end
     
-    X = F*X0 + G*B;
+X = F*X0 + G*B;    
 
 %%
 x = reshape(X,n,N);
@@ -385,3 +390,58 @@ plot(x');hold on;
 
 figure()
 plot(b');hold on;
+%%
+us = US(:,1:n);
+P=[];
+lambda = 0.1;
+L = 0.01;
+cvx_begin 
+        variable B(n*(N))
+        minimize ((F*X0 + G*B)'*QN*(F*X0 + G*B) + B'*RN*B ) 
+        subject to
+        for i = 1:N
+             norm(us * B((i-1)*n+1:i*n),1) <= L;
+%             norm(B((i-1)*n+1:i*n),1) <= L
+        end
+        
+cvx_end
+%%
+X = F*X0 + G*B;    
+
+
+xc = reshape(X,n,N);
+bc = reshape(B,n,N);
+figure()
+plot(xc');hold on;
+
+figure()
+plot(bc');hold on;
+
+% %% Images
+% close all;
+% Imc = [];
+% Im = [];
+% for i=1:N
+%     Im = [Im,us * b(:,i)];
+%     Imc = [Imc,us * bc(:,i)];
+% end
+% 
+% im = reshape(Im(:,1),100,100);
+% imc = reshape(Imc(:,1),100,100);
+% 
+% 
+% %
+% figure()
+% subplot(1,2,1)
+% image(im,'CDataMapping','scaled');hold on
+% colorbar
+% subplot(1,2,2)
+% image(imc,'CDataMapping','scaled');hold on
+% colorbar
+% %
+% 
+% norm(Im(:,1),1)
+%%
+Q = Um(1,:)'*Um(1,:)
+
+eigs(Q)

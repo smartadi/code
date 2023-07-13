@@ -1,6 +1,7 @@
 clear all;
 close all;
 clc;
+digits(8);
 s = 5;
 rng(s);
 % lambda = - 0 - 5i;
@@ -335,4 +336,17 @@ title("NP output")
 figure()
 plot(t,V)
 title("noise")
+
+%% Save Data
+
+writematrix([t',xpf'],'gt_dynamics.csv');
+writematrix([t',ywf'],'gt_WF_dynamics.csv');
+writematrix([t',ynp'],'gt_NP_dynamics.csv');
+
+writematrix(Um,'gt_eigvec.csv');
+writematrix(Dm,'gt_eigval.csv');
+
+writematrix(x0,'gt_init.csv');
+
+
 

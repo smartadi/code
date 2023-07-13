@@ -6,13 +6,13 @@ from sklearn.decomposition import PCA  # to apply PCA
 # Load spike data
 WF_data = np.load('../data/data_WF_resize_10k_n100.npy')
 # WF_data = np.memmap('data/data_WF_short.npy',dtype='float32',mode='r', shape=(313600, 5000))
-ws = np.array(WF_data[:, :1000])
+ws = np.array(WF_data[:, :5000])
 w = np.array(WF_data)
 
 W_short = ws.astype(np.float32)
 W = w.astype(np.float32)
 print("data loaded")
-
+print(w.shape)
 ############
 @jit(target_backend='cuda')
 def scaling_numba1(a):
@@ -53,6 +53,7 @@ r = 500
 u_r = u[:, :r]
 s_r = s[:r]
 D = np.diag(s_r)
+US = u_r*s_r
 ########################
 
 W_proj = u_r.T@W_scaled
@@ -60,7 +61,7 @@ W_proj = u_r.T@W_scaled
 # W_proj = np.linalg.inv(S)@u_r.T@W_short
 # np.save('data/data_WF_scaled5', W_scaled)
 # np.save('data/data_WF_projected_scaled5', W_proj)
-# print(W_proj[:,0])
+print(W_proj.shape)
 
 #############
 fig, ax = plt.subplots()
@@ -222,3 +223,6 @@ plt.show()
 print(np.shape(W_proj))
 np.save('../data/data_WF_PCA_projections_small', W_proj)
 '''
+
+np.save('../data/data_WF_US_small', US)
+np.savetxt('../data/data_WF_US_small.csv', US,delimiter=',')
