@@ -7,17 +7,19 @@ rng(s);
 digits(8);
 
 US = double(table2array(readtable("data/data_WF_US_small.csv")));
+dt = 0.1
 t = 0:0.1:100;
-
+n=12
 % x0=1;
 % phi = 0.1;
 % x = x0*exp(lambda*t);
 % 
 % figure()
 % plot(t,x)
-%% Generate basis
-
-n = 20;
+% %% Generate basis
+% 
+% n = 20;
+%%
 V = 0.5*ones(n,n) - rand(n);
 rank(V);
 
@@ -40,16 +42,15 @@ for j=1:n
 end
 
 [Q1 R1] =qr(V);
-%%
-Q1(:,1)'*Q1(:,2);
-%% EigV of random symmetric matrix (orthogonal eigenvalues)
-% 
-A = rand(n);
-A2 = A.*A';
-% [E2 D2] = eig(A2);
-%% Assymetric matrix (non-orthogonal eigenvalues)
 
-% [E D] = eig(A);
+%% EigV of random symmetric matrix (orthogonal eigenvalues)
+A = rand(n)+1; % random matrix
+A2 = A.*A';  % symmetric matrix
+
+% Generating a similarity transform
+[P, J] = jordan(A2);
+P = real(P);
+
 %% Distribute eigenvalues (naive approach to generate marginally stable dynamics)
 
 %a = rand(n/2,1,"like",1i);
@@ -69,194 +70,66 @@ d = sort(d);
 Ds = diag(d);
 
 D = diag(sort([a0;b0]));
+%eps = 100;
+% eps = 0.1;
+eps = 0.2;
 
-%% New system
-
-% B = E*D*E'
-% 
-x0 = 0.5 - rand(n,1);
-% x=[];
-% for i = t
-%     x = [x,expm(B*i)*x0];
-% end
-% figure()
-% plot(t,x)
-% title('marginally stable system')
-% %% Fast and Slow
-% 
-% % change E to E2
-eps = 10;
 EPS = [eye(n/2),zeros(n/2,n/2);
     zeros(n/2,n/2),1/eps*eye(n/2)];
-% 
-% B = EPS*E2*D*E2';
-% 
-% % x0 = rand(10,1);
-% C = 10*(1-2*rand(n,n));
-% x=[];
-% for i = t
-%  
-%     x = [x,expm(B*i)*x0];
-%     
-% end
-% y = C*x;
-% figure()
-% plot(t,x)
-% title('marginally stable system with fast and slow modes')
-% 
-% 
-% figure()
-% plot(t,y)
-% title('output with fast and slow modes')
+Dmix = diag(EPS*D);
+D = diag(D)
+
+Dmm=[];
+for i=1:n/2
+    dmm=[];
+    for j= 1:n/2
+        if i==j
+            d = [real(Dmix(i*2-1)),-imag(Dmix(i*2-1));
+                imag(Dmix(i*2-1)),real(Dmix(i*2-1))];
+        else
+            d = zeros(2,2);
+        end
+        dmm = [dmm,d];
+    end
+    Dmm = [Dmm;dmm];
+end
+Dmm
+
+Dnew=[];
+for i=1:n/2
+    dn=[];
+    for j= 1:n/2
+        if i==j
+            d = [real(D(i*2-1)),-imag(D(i*2-1));
+                imag(D(i*2-1)),real(D(i*2-1))];
+        else
+            d = zeros(2,2);
+        end
+        dn = [dn,d];
+    end
+    Dnew = [Dnew;dn];
+end
+Dnew
+%% New system
+
+x0 = 0.5 - rand(n,1);
+
 %% Mix and Match 
 WF = full(sprand(n/2,n,1));
 NP = full(sprand(n/2,n,1));
-%% Non-Orthogonal modes
-
-% B2 = E2*D*E2';
-% B2f = EPS*E*D*E';
-% 
-% x2=[];
-% x2f=[];
-% for i = t
-%     x2 = [x2,expm(B2*i)*x0];
-%     x2f = [x2f,expm(B2f*i)*x0];
-% end
-% figure()
-% plot(t,x);hold on;
-% plot(t,x2)
-% plot(t,x2f)
-% 
-% 
-% figure()
-% plot(t,x2)
-% title('marginally stable system')
-% 
-% 
-% figure()
-% plot(t,x2f)
-% title('marginally stable system with fast and slow modes')
 
 
-% figure()
-% plot(t,y)
-% title('output with fast and slow modes')
-%% stabilise the dynamics
-
-% delta = -5*rand(n/2,1);
-% delta = [delta;delta]; 
-% Ds = diag(delta + [a;b]);
-
-% Bs = E*Ds*E';
-% Bsf = EPS*E*Ds*E';
-% 
-% 
-% xs=[];
-% xsf=[];
-% for i = t
-%  
-%     xs = [xs,expm(Bs*i)*x0];
-%     xsf = [xsf,expm(Bsf*i)*x0];
-% end
-% figure()
-% plot(t,x);hold on;
-% plot(t,xs)
-% plot(t,xsf)
-% % diag(Ds)
-% Bsf
-% Bs
-%% Real valued A
-
-% A = 0.5*ones(n,n) - rand(n,n)
-% B = rand(n,n);
-% CC = [];
-% DD = [];
-% sys = ss(A,B,CC,DD);
-% p = pole(sys);
-% p
-% for i = 1:n
-%      if real(p(i)) >= 0
-%         p(i) = p(i) - real(p(i))- 0.01*rand(1);
-%      end
-% end
-% 
-% K = place(A,B,p);
-% 
-% Anew = A-B*K
-% 
-% [Eo Do] = eig(A);
-% [En Dn] = eig(Anew);
-% diag(Dn)
-% p
-%%
-% Anewf = EPS*Anew;
-% 
-% xp=[];
-% xpf=[];
-% for i = t
-%     xp = [xp,expm(Anew*i)*x0];
-%     xpf = [xpf,expm(Anewf*i)*x0];
-% end
-% figure()
-% plot(t,xp);
-% 
-% figure()
-% plot(t,xpf);
-%% Rotation
-
-
-% Anewf = EPS*Q1'*Anew*Q1;
-% 
-% xp=[];
-% xpf=[];
-% for i = t
-%     xp = [xp,expm(Anew*i)*x0];
-%     xpf = [xpf,expm(Anewf*i)*x0];
-% end
-% figure()
-% plot(t,xp);
-% 
-% figure()
-% plot(t,xpf);
-%% Alternative approach
-
-% Consider Block diagonal form M = [a -b;b a] for each complex conjugate
-% pair $\lambda = a \pm ib $  
-
-% generate blk diag from
-[Vnew Dnew] = cdf2rdf(Q1,D);
-
-AA = Vnew*Dnew*Vnew';
-%%
-% AAA = A*Dnew*inv(A);
-
-Anew = A*Dnew*inv(A);
-Amix = A*EPS*Dnew*inv(A);
-
-Anew = Q1*Dnew*inv(Q1);
-Amix = EPS*Q1*Dnew*inv(Q1);
-
-% [VV,DD] = eig(AAA);
 %%
 
-% AAf = EPS*AAA;
-% 
-% xp=[];
-% xpf=[];
-% for i = t
-%     xp = [xp,expm(AAA*i)*x0];
-%     xpf = [xpf,expm(AAf*i)*x0];
-% end
-% figure()
-% plot(t,xp);
-% 
-% figure()
-% plot(t,xpf);
-%%
-% diag(DD);
-% 
-% eig(AAf);
-% eig(AAA);
+Anew = P*Dnew*inv(P);
+Amix = P*Dmm*inv(P);
+
+
+[Un,Dn] = eig(Anew);
+[Um,Dm] = eig(Amix);
+
+dt=0.1;
+Amdt = expm(Amix*dt)
 
 eig(Anew)
 eig(Amix)
@@ -272,21 +145,21 @@ for i = t
 end
     ywf = WF*xpf;
     ynp = NP*xpf;
-% figure()
-% plot(t,xp);
-% title("latent dynamics")
-% 
-% figure()
-% plot(t,xpf);
-% title("latent dynamics time scaled")
-% 
-% figure()
-% plot(t,ywf);
-% title("WF output")
-% 
-% figure()
-% plot(t,ynp);
-% title("NP output")
+figure()
+plot(t,xp);
+title("latent dynamics")
+
+figure()
+plot(t,xpf);
+title("latent dynamics time scaled")
+
+figure()
+plot(t,ywf);
+title("WF output")
+
+figure()
+plot(t,ynp);
+title("NP output")
 
 %% Eigen Decomposition
 [Un,Dn] = eig(Anew);
@@ -306,14 +179,14 @@ amp = 0.01*rand(n,1);
 
 phi = 3.14*rand(n,1);
 for i = t
-    Cn  = [Cn, Un*Dn^(i)*Un'];
-    Cm  = [Cm, Um*Dm^(i)*Um'];
+    Cn  = [Cn, P*expm(Dnew*i)*inv(P)];
+    Cm  = [Cm, P*expm(Dmm*i)*inv(P)];
     v   = amp.*sin(f*i+phi);
     V = [v;V];
     xp  = [xp,expm(Anew*i)*x0 + Cn*V];
     xpf = [xpf,expm(Amix*i)*x0 + Cm*V];
 end
-V = reshape(V,20,length(t));
+V = reshape(V,n,length(t));
 ywf = WF*xpf;
 ynp = NP*xpf;
 
@@ -336,14 +209,14 @@ title("NP output")
 figure()
 plot(t,V)
 title("noise")
-%%
+%
 
 %%
 T = 100;
-N = 10;
+N = 100;
 
-% Q = 0.01*eye(n);
-Q = Um(:,1)*Um(:,1)';
+Q = 0.01*eye(n);
+%Q = Um(:,1)*Um(:,1)';
 R = 1*eye(n);
 I = eye(N);
 G = [];
@@ -352,13 +225,16 @@ QN = kron(I,Q);
 RN = kron(I,R);
 X0=x0;
 for i = 1:N
-    F = [F;Um*Dm^(i)*Um'];
+%     F = [F; Um*Dm^(i)*Um'];
+    F = real([F; P*expm(Dmm*dt)^(i)*inv(P)]);
     
     
     cc=[];
     for j = 1:N
         if j<=i
-            c = Um*Dm^(i-j+1)*Um';
+%             c = Um*Dm^(i-j+1)*Um';
+                        c = P*expm(Dmm*dt)^(i-j+1)*inv(P);
+
         else
             c = zeros(n,n);
         end
@@ -391,31 +267,32 @@ plot(x');hold on;
 figure()
 plot(b');hold on;
 %%
-us = US(:,1:n);
-P=[];
-lambda = 0.1;
-L = 0.01;
-cvx_begin 
-        variable B(n*(N))
-        minimize ((F*X0 + G*B)'*QN*(F*X0 + G*B) + B'*RN*B ) 
-        subject to
-        for i = 1:N
-             norm(us * B((i-1)*n+1:i*n),1) <= L;
-%             norm(B((i-1)*n+1:i*n),1) <= L
-        end
-        
-cvx_end
-%%
-X = F*X0 + G*B;    
+% us = US(:,1:n);
+% P=[];
+% lambda = 0.1;%             c = P*expm(Dmm*dt)^(i-j+1)*inv(P);
 
-
-xc = reshape(X,n,N);
-bc = reshape(B,n,N);
-figure()
-plot(xc');hold on;
-
-figure()
-plot(bc');hold on;
+% L = 0.01;
+% cvx_begin 
+%         variable B(n*(N))
+%         minimize ((F*X0 + G*B)'*QN*(F*X0 + G*B) + B'*RN*B ) 
+%         subject to
+%         for i = 1:N
+%              norm(us * B((i-1)*n+1:i*n),1) <= L;
+% %             norm(B((i-1)*n+1:i*n),1) <= L
+%         end
+%         
+% cvx_end
+% %%
+% X = F*X0 + G*B;    
+% 
+% 
+% xc = reshape(X,n,N);
+% bc = reshape(B,n,N);
+% figure()
+% plot(xc');hold on;
+% 
+% figure()
+% plot(bc');hold on;
 
 % %% Images
 % close all;
@@ -442,6 +319,78 @@ plot(bc');hold on;
 % 
 % norm(Im(:,1),1)
 %%
-Q = Um(1,:)'*Um(1,:)
+Q = Um(:,1:2)*Um(:,1:2)';
 
 eigs(Q)
+%% Modal Supression
+R = 1*eye(n);
+Q = 0.01*Um(:,1:2)*Um(:,1:2)' + 0.01*Um(:,3:4)*Um(:,3:4)' + + 0.01*Um(:,5:6)*Um(:,5:6)'
+
+%Q = 0.01*Um(:,7:8)*Um(:,7:8)' + 0.01*Um(:,9:10)*Um(:,9:10)' + + 0.01*Um(:,11:12)*Um(:,11:12)'
+
+Q = real(P*[1*eye(6),zeros(6,6);
+    zeros(6,6),0*eye(6)]*inv(P));
+% Q = 1*Um(:,1:2)*Um(:,1:2)'
+% Q = 0.01*real(P*eye(n)*inv(P))
+QN = kron(I,Q);
+RN = kron(I,R);
+
+    cvx_begin 
+        variable B(n*(N))
+        minimize ((F*X0 + G*B)'*QN*(F*X0 + G*B) + B'*RN*B) 
+    cvx_end
+    
+X = F*X0 + G*B; 
+x = reshape(X,n,N);
+b = reshape(B,n,N);
+
+%%
+close all;
+figure()
+plot(x');hold on;
+title('fast modal suppression')
+
+figure()
+plot(b');hold on;
+
+
+
+%% Input Smoothness and laser intensity
+
+% R = 0*eye(n);
+% %Q = 0.01*Um(:,1:2)*Um(:,1:2)'
+% l = 0.01;
+% 
+% Q = 0*Um(:,1:2)*Um(:,1:2)'
+% 
+% QN = kron(I,Q);
+% RN = kron(I,R);
+% 
+% delta = 0.00;
+% 
+%     cvx_begin 
+%         variable B(n*(N))
+%         minimize ((F*X0 + G*B*l)'*QN*(F*X0 + G*B*l) + B'*RN*B*l^2)
+%         subject to
+%         for i=1:N-1
+%             c = zeros(1,N);
+%             c(i) = -1;
+%             c(i+1) = 1;
+%             M = c*c';
+%             B'*M*B*l^2 <= delta; 
+%         end
+%     cvx_end
+%     
+% X = F*X0 + G*B; 
+% x = reshape(X,n,N);
+% b = reshape(B,n,N);
+% 
+% %
+% close all;
+% figure()
+% plot(x');hold on;
+% title('modal suppression')
+% 
+% figure()
+% plot(b');hold on;
+
