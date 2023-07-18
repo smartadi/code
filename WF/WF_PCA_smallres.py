@@ -1,12 +1,14 @@
+## Here we repeat the PCA on WF data for low resolution images 100*100 on 10k images from original dataset.
 import numpy as np
 import matplotlib.pyplot as plt
 from numba import jit, prange
 from sklearn.decomposition import PCA  # to apply PCA
 
-# Load spike data
+# Load spike data image vector(100*100) by time(10000)
 WF_data = np.load('../data/data_WF_resize_10k_n100.npy')
-# WF_data = np.memmap('data/data_WF_short.npy',dtype='float32',mode='r', shape=(313600, 5000))
-ws = np.array(WF_data[:, :5000])
+
+t = 1000
+ws = np.array(WF_data[:, :t])
 w = np.array(WF_data)
 
 W_short = ws.astype(np.float32)
@@ -35,8 +37,6 @@ def scaling_numba1(a):
             a[i, j] = (a[i, j] - mean[0, j]) / std[0, j]
 
     return a, mean, std
-
-
 ################
 
 
@@ -44,23 +44,22 @@ def scaling_numba1(a):
 def pca_scale(a):
     uu, ss, vvh = np.linalg.svd(a, full_matrices=False)
     return uu, ss, vvh
-
-
 #######################
+
+
 W_scaled, _, _ = scaling_numba1(W_short)
 [u, s, v] = pca_scale(W_scaled)
+
+# rank of reconstruction
 r = 500
 u_r = u[:, :r]
 s_r = s[:r]
+v_r = v[:r,:]            # The temporal components we need
 D = np.diag(s_r)
 US = u_r*s_r
 ########################
 
 W_proj = u_r.T@W_scaled
-# W_proj = u_r.T@W_short
-# W_proj = np.linalg.inv(S)@u_r.T@W_short
-# np.save('data/data_WF_scaled5', W_scaled)
-# np.save('data/data_WF_projected_scaled5', W_proj)
 print(W_proj.shape)
 
 #############
@@ -73,7 +72,7 @@ plt.show()
 
 ##########
 dims = 50
-t = 5000
+t = 1000
 time = np.linspace(1, t, t)
 d = np.linspace(1, dims, dims)
 T, N = np.meshgrid(time, d)
@@ -83,13 +82,20 @@ ax = plt.axes(projection='3d')
 
 surf = ax.plot_surface(T, N, W_proj[0:dims, :t], cmap=plt.cm.cividis)
 # Set axes label
-# ax.set_xlabel('x', labelpad=20)
-# ax.set_ylabel('y', labelpad=20)
-# ax.set_zlabel('z', labelpad=20)
+ax.set_xlabel('x', labelpad=20)
+ax.set_ylabel('y', labelpad=20)
+ax.set_zlabel('z', labelpad=20)
 ax.set_title('projected dimensions')
 fig.colorbar(surf, shrink=0.5, aspect=8)
 plt.show()
-
+############################
+dims = 5
+t = 1000
+fig, ax = plt.subplots()
+ax.plot(time,v_r[0:dims, :t].T)
+ax.set(xlabel='time', ylabel='temoral modes',
+       title='TV_r')
+plt.show()
 
 @jit(target_backend='cuda')
 def pca_recon(a, ur):
@@ -99,18 +105,18 @@ def pca_recon(a, ur):
     return b
 
 
-'''
-W_rcon = PCA_recon(W_short,u_r)
+# uncomment for reconstruction
+# W_rcon = PCA_recon(W_short,u_r)
+#
+# print(W_rcon[:,0])
+# ims = W_rcon[:,0]
+# imr = ims.reshape(560, 560)
+#
+# plt.imshow(imr)
+# plt.show()
+#
+# print()
 
-print(W_rcon[:,0])
-ims = W_rcon[:,0]
-imr = ims.reshape(560, 560)
-
-plt.imshow(imr)
-plt.show()
-
-print()
-'''
 
 # print(u_r[:,0])
 '''
@@ -180,8 +186,8 @@ plt.show()
 '''
 
 
-'''
 
+'''
 from mpl_toolkits.mplot3d.axes3d import get_test_data
 from matplotlib import cm
 
@@ -221,8 +227,8 @@ plt.show()
 
 
 print(np.shape(W_proj))
-np.save('../data/data_WF_PCA_projections_small', W_proj)
-'''
 
-np.save('../data/data_WF_US_small', US)
-np.savetxt('../data/data_WF_US_small.csv', US,delimiter=',')
+'''
+# np.save('../data/data_WF_PCA_temporal_100res_10k', vr)
+# np.save('../data/data_WF_US_small', US)
+# np.savetxt('../data/data_WF_US_small.csv', US,delimiter=',')

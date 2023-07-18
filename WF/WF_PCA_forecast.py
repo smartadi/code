@@ -8,7 +8,7 @@ import matplotlib.animation as animation
 r=10
 # Load spike data
 WF_data = np.load('../data/data_WF_PCA_projections_small.npy')
-WF_forecast =np.float32( np.loadtxt('/home/nimbus/Documents/aditya/neuro/overschee book/subfun/WF_PCA_forecast_10k.csv', delimiter=","))
+WF_forecast =np.float32( np.loadtxt('/home/nimbus/Documents/aditya/neuro/SubspaceID/subfun/WF_PCA_forecast_10k.csv', delimiter=","))
 U = np.load('../data/WF_PCA_map.npy')
 U_r = U[:,:r]
 print(WF_data.dtype)

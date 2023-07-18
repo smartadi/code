@@ -117,7 +117,7 @@ plt.show()
 
 #inversion
 
-forcast_embeddings = np.loadtxt("/home/nimbus/Documents/aditya/neuro/overschee book/examples/UMAP10_forecast_10k.csv",
+forcast_embeddings = np.loadtxt("/home/nimbus/Documents/aditya/neuro/SubspaceID/examples/UMAP10_forecast_10k.csv",
                                 delimiter=",")
 
 embeddings_recon = Umap.inverse_transform(forcast_embeddings.T)
