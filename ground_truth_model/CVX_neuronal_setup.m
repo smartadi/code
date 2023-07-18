@@ -72,7 +72,7 @@ Ds = diag(d);
 D = diag(sort([a0;b0]));
 %eps = 100;
 % eps = 0.1;
-eps = 0.2;
+eps = 0.5;
 
 EPS = [eye(n/2),zeros(n/2,n/2);
     zeros(n/2,n/2),1/eps*eye(n/2)];
@@ -175,40 +175,52 @@ Cn =[];
 Cm =[];
 V =[];
 f = 10*rand(n,1);
-amp = 0.01*rand(n,1);
+amp = 0.05*rand(n,1);
 
 phi = 3.14*rand(n,1);
+k=0;
 for i = t
     Cn  = [Cn, P*expm(Dnew*i)*inv(P)];
-    Cm  = [Cm, P*expm(Dmm*i)*inv(P)];
+    Cm  = [Cm, P*expm(Dmm*dt)^k*inv(P)];
     v   = amp.*sin(f*i+phi);
     V = [v;V];
     xp  = [xp,expm(Anew*i)*x0 + Cn*V];
-    xpf = [xpf,expm(Amix*i)*x0 + Cm*V];
+%     xpf = [xpf,expm(Amix*i)*x0 + Cm*V];
+    xpf = [xpf,P*(expm(Dmm*dt)^k)*inv(P)*x0 + Cm*V];
+    k=k+1;
+
 end
 V = reshape(V,n,length(t));
 ywf = WF*xpf;
 ynp = NP*xpf;
 
 figure()
+subplot(2,1,1)
 plot(t,xp);
-title("latent dynamics")
+xlabel('time')
+title("latent dynamics with noise")
 
-figure()
+subplot(2,1,2)
 plot(t,xpf);
-title("latent dynamics time scaled")
+xlabel('time')
+title("latent dynamics time scaled(noisy)")
 
 figure()
+title("outputs")
+subplot(2,1,1)
 plot(t,ywf);
+xlabel('time')
 title("WF output")
 
-figure()
+subplot(2,1,2)
 plot(t,ynp);
+xlabel('time')
 title("NP output")
 
+
 figure()
-plot(t,V)
-title("noise")
+plot(t(1:100),V(:,1:100))
+title("noise snapshot")
 %
 
 %%
@@ -357,40 +369,205 @@ plot(b');hold on;
 
 %% Input Smoothness and laser intensity
 
-% R = 0*eye(n);
-% %Q = 0.01*Um(:,1:2)*Um(:,1:2)'
-% l = 0.01;
-% 
+R = 1*eye(n);
+Q = 0.01*Um(:,1:2)*Um(:,1:2)';
+l = 1;
+
 % Q = 0*Um(:,1:2)*Um(:,1:2)'
-% 
-% QN = kron(I,Q);
-% RN = kron(I,R);
-% 
-% delta = 0.00;
-% 
-%     cvx_begin 
-%         variable B(n*(N))
-%         minimize ((F*X0 + G*B*l)'*QN*(F*X0 + G*B*l) + B'*RN*B*l^2)
+
+QN = kron(I,Q);
+RN = kron(I,R);
+
+delta = 1;
+
+    cvx_begin 
+        variable B(n*(N))
+
+        minimize ((F*X0 + G*B*l)'*QN*(F*X0 + G*B*l) + B'*RN*B*l^2)
+        subject to
+        for i=1:N-1
+            c = zeros(1,N);
+            c(i) = -1;
+            c(i+1) = 1;
+            M = c*c';
+            B'*M*B*l^2 <= delta; 
+        end
+    cvx_end
+    
+X = F*X0 + G*B; 
+x = reshape(X,n,N);
+b = reshape(B,n,N);
+
+%
+close all;
+figure()
+plot(x');hold on;
+title('modal suppression')
+
+figure()
+plot(b');hold on;
+
+%% with sparsity constraints
+
+R = 1*eye(n);
+Q = 0.01*Um(:,1:2)*Um(:,1:2)';
+l = 1;
+
+% Q = 0*Um(:,1:2)*Um(:,1:2)'
+us = US(:,1:n);
+
+QN = kron(I,Q);
+RN = kron(I,R);
+
+delta = 1;
+
+    cvx_begin 
+        variable B(n*(N))
+        obj = (F*X0 + G*B*l)'*QN*(F*X0 + G*B*l) + B'*RN*B*l^2;
+        for i = 1:N
+            obj = obj + norm(us * B((i-1)*n+1:i*n),1);
+        end
+        
+        minimize (obj)
 %         subject to
 %         for i=1:N-1
 %             c = zeros(1,N);
 %             c(i) = -1;
 %             c(i+1) = 1;
 %             M = c*c';
-%             B'*M*B*l^2 <= delta; 
+%             B'*M*B*l^2 <= delta;            
 %         end
-%     cvx_end
-%     
-% X = F*X0 + G*B; 
-% x = reshape(X,n,N);
-% b = reshape(B,n,N);
-% 
-% %
-% close all;
-% figure()
-% plot(x');hold on;
-% title('modal suppression')
-% 
-% figure()
-% plot(b');hold on;
+    cvx_end
+    
+X = F*X0 + G*B; 
+x = reshape(X,n,N);
+b = reshape(B,n,N);
 
+%
+close all;
+figure()
+plot(x');hold on;
+title('modal suppression')
+
+figure()
+plot(b');hold on;
+%%
+i=20;
+Im = reshape(us * b(:,i),100,100);
+%%
+figure()
+image(Im,'CDataMapping','scaled')
+colorbar
+%%
+
+In=[];
+for i = 1:n
+    Im = reshape(us * b(:,i),100,100);
+    [m i] = max(Im);
+    [m j] = max(m);
+    i
+    j
+    In = [In;i(j),j];
+end
+%% Spatial modes
+close all;
+figure()
+um=[];
+
+for i=1:n
+u1 = u(:,i);
+Im = reshape(u1,100,100);
+Imedian = medfilt2(Im);
+imedian = Imedian(:);
+um = [um,imedian];
+%
+subplot(4,3,i)
+image(Imedian,'CDataMapping','scaled');hold on;
+colorbar
+plot(In(i),In(i),'*r');
+end
+%%
+
+i=10;
+Im = reshape(um*ss * b(:,i),100,100);
+
+figure()
+image(Im,'CDataMapping','scaled')
+colorbar
+%%
+In=[];
+for i = 1:n
+    Im = reshape(um*ss * b(:,i),100,100);
+    [m i] = max(Im);
+    [m j] = max(m);
+    i
+    j
+    In = [In;i(j),j];
+end
+
+%% Random spatial map
+
+V2 = 0.5*ones(100,n) - rand(100,n);
+rank(V2);
+
+V2 = V2./vecnorm(V2,2,1);
+
+[Q2 R2] =qr(V2);
+%%
+Q2(:,2)'*Q2(:,2)
+mp = Q2(:,1:n); 
+%%m
+%% with sparsity constraints
+X0 = 10*(0.5 - rand(n,1));
+
+R = 0.01*eye(n);
+% Q = 0.01*Um(:,1:2)*Um(:,1:2)';
+Q = 0.1*Um(:,1:2)*Um(:,1:2)' + 0.1*Um(:,3:4)*Um(:,3:4)' + + 0.1*Um(:,5:6)*Um(:,5:6)';
+% Q = 0.01*Um(:,7:8)*Um(:,7:8)' + 0.01*Um(:,9:10)*Um(:,9:10)' + + 0.01*Um(:,11:12)*Um(:,11:12)';
+
+l = 1;
+
+% Q = 0*Um(:,1:2)*Um(:,1:2)'
+us = US(:,1:n);
+
+QN = kron(I,Q);
+RN = kron(I,R);
+
+delta = 1;
+
+    cvx_begin 
+        variable B(n*(N))
+        obj = (F*X0 + G*B*l)'*QN*(F*X0 + G*B*l) + B'*RN*B*l^2;
+        for i = 1:N
+            obj = obj + 1*norm(mp * B((i-1)*n+1:i*n),1);
+        end
+        
+        minimize (obj)
+%         subject to
+%         for i=1:N-1
+%             c = zeros(1,N);
+%             c(i) = -1;
+%             c(i+1) = 1;
+%             M = c*c';
+%             B'*M*B*l^2 <= delta;            
+%         end
+    cvx_end
+    
+X = F*X0 + G*B; 
+x = reshape(X,n,N);
+b = reshape(B,n,N);
+
+%
+close all;
+figure()
+plot(x');hold on;
+title('modal suppression')
+
+figure()
+plot(b');hold on;
+%%
+i=1;
+Im = reshape(mp * b(:,i),10,10);
+figure()
+image(Im,'CDataMapping','scaled')
+colorbar
