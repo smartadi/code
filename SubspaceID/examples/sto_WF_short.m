@@ -1,23 +1,228 @@
-%
-% Demo file for Stochastic Subspace identification
-%
-% Copyright: 
-%          Peter Van Overschee, December 1995
-%          peter.vanoverschee@esat.kuleuven.ac.be
-%
-%
-%   Consider a multivariable fourth order system a,k,c,r
-%   which is driven by white noise and generates an output y: 
-%   
-%               x_{k+1} = A x_k + K e_k
-%                y_k    = C x_k + e_k
-%              cov(e_k) = R
-echo off;
+%% Data Generation:
+clear all;
+close all;
+clc;
+s = 5;
+rng(s);
+% lambda = - 0 - 5i;
+digits(8);
+
+% US = double(table2array(readtable("data/data_WF_US_small.csv")));
+dt=0.1;
+t = 0:dt:1000;
+
+% t = 0:dt:20;
+
+% %% Generate basis
+
+n = 8;
+V = 0.5*ones(n,n) - rand(n);
+rank(V);
+
+V = V./vecnorm(V,2,1);
+
+V(:,1)'*V(:,2);
+
+% %% Gram Schmidt
+
+Q = zeros(n,n);
+R = zeros(n,n);
+for j=1:n
+    v=V(:,j);
+    for i=1:j-1
+        R(i,j) = Q(:,j)'*V(:,j);
+        v = v-R(i,j)*Q(:,i);
+    end
+    R(j,j) = norm(v);
+    Q(:,j) = v/R(j,j);
+end
+
+[Q1, R1] =qr(V);
+% %% EigV of random symmetric matrix (orthogonal eigenvalues)
+% 
+%A = rand(n)+1; % random matrix
+% A = rand(n); % random matrix
+% A2 = A.*A';  % symmetric matrix
+% 
+% 
+% % A = full(sprand(n,n,1));
+% 
+% 
+% B = 2*(0.5 - rand(n)); % random matrix
+% % B = 1+  rand(n); % random matrix
+% [P, J] = jordan(A2);
+% [P2, J] = jordan(B);
+% P = real(P);
+% P2 = real(P2);
+% %% Distribute eigenvalues (naive approach to generate marginally stable dynamics)
+
+%a = rand(n/2,1,"like",1i);
+delta = -0.1*rand(n/2,1); 
+
+a = delta + (rand(n/2,1)-.5)*1i;
+b = conj(a);
+
+a0 = 0*delta + (rand(n/2,1)-.5)*1i;
+b0 = conj(a0);
+
+d0 = [a0;b0];
+d0 = sort(d0);
+
+d = [a;b];
+d = sort(d);
+Ds = diag(d);
+
+D = 1*diag(sort([a0;b0]));
+
+
+% %% New system
+
+x0 = 0.5 - rand(n,1);
+
+%eps = 100;
+eps = 0.5;
+% eps = 0.05;
+
+EPS = [eye(n/2),zeros(n/2,n/2);
+    zeros(n/2,n/2),1/eps*eye(n/2)];
+
+Dmix = EPS*D;
+
+%%% Mix and Match 
+WF = full(sprand(n/2,n,1));
+NP = full(sprand(n/2,n,1));
+
+
+%%% Alternative approach 
+
+% generate blk diag from
+[Vnew Dnn] = cdf2rdf(Q1,D);
+[Vmm Dmm] = cdf2rdf(Q1,Dmix);
+%%% 
+% 
+% Anew = P*Dnn*inv(P)
+% 
+% 
+% Amix = P*Dmm*inv(P)
+% 
+% 
+% % 
+% Anew2 = B*Dnn*inv(B)
+% Amix2 = B*Dmm*inv(B)
+
+Anew = Q1*Dnn*inv(Q1)
+Amix = Q1*Dmm*inv(Q1)
+
+% Eigen Decomposition
+
+[Un,Dn] = eig(Anew);
+[Um,Dm] = eig(Amix);
+
+dt=0.1;
+Amdt = expm(Amix*dt)
+
+eig(Anew)
+eig(Amix)
+% %%
+NP = NP-0.5;
+WF = WF-0.5;
+close all;
+xp=[];
+xpu=[];
+xpf=[];
+p=[];
+k=1;
+for i = t
+    
+
+    xp =  [xp,  expm(Anew*i)*x0];
+    xpf = [xpf, expm(Amix*i)*x0];
+    xpu = [xpu,Q1*expm(Dmm*i)*inv(Q1)*x0];
+    p = [p,Q1*expm(Dmm*dt)^k*inv(Q1)*x0];
+    k = k+1;
+end
+    ywf = WF*xpf;
+    ynp = NP*xpf;
+    
+close all;    
+figure()
+plot(t,xp);
+title("latent dynamics")
+
+figure()
+plot(t,xpf);
+title("latent dynamics time scaled")
+
+figure()
+plot(t,ywf);
+title("WF output")
+
+figure()
+plot(t,ynp);
+title("NP output")
+
+figure()
+plot(t,xpu);
+title("latent dynamics via modes")
+
+figure()
+plot(t,p);
+title("latent dynamics via modes discrete")
+
+% %% Add high freq noise
+close all;
+xp=[];
+xpf=[];
+f = 5;
+Cn =[];
+Cm =[];
+V =[];
+f = 10*rand(n,1);
+amp = 0.01*rand(n,1);
+
+G = 0.5-rand(n);
+ 
+phi = 1*3.14*rand(n,1);
+for i = t
+    Cn  = [Cn, Q1*expm(Dnn*i)*inv(Q1)];
+    Cm  = [Cm, Q1*expm(Dmm*i)*inv(Q1)];
+    v   = amp.*sin(f*i+phi);
+    V = [v;V];
+    xp  = [xp,  expm(Anew*i)*x0 + Cn*V];
+    xpf = [xpf, expm(Amix*i)*x0 + Cm*V];
+%     xp  = [xp,  expm(Anew*i)*x0 + G*Cn*V];
+%     xpf = [xpf, expm(Amix*i)*x0 + G*Cm*V];
+end
+V = reshape(V,n,length(t));
+ywf = WF*xpf;
+ynp = NP*xpf;
+
+figure()
+plot(t,xp);
+title("latent dynamics")
+
+figure()
+plot(t,xpf);
+title("latent dynamics time scaled")
+
+figure()
+plot(t,ywf);
+title("WF output")
+
+figure()
+plot(t,ynp);
+title("NP output")
+
+figure()
+plot(t,V)
+title("noise")
+%%
+
+
 
 disp('loading WF PCA projections')
-%data = double(table2array(readtable('/home/nimbus/Documents/aditya/neuro/code/data/data_WF_UMAP_projections_small.csv')))';
-%data = double(table2array(readtable('/home/nimbus/Documents/aditya/neuro/code/data/data_WF_KPCA_projections_small.csv')));
-data = double(table2array(readtable('/home/nimbus/Documents/aditya/neuro/code/data/data_WF_PCA_projections_small.csv')));
+
+data = ywf;
 
 
 
@@ -30,11 +235,11 @@ data = double(table2array(readtable('/home/nimbus/Documents/aditya/neuro/code/da
 %    r = [0.01];
 %    l = 1; 				% Number of outputs
 
-l=10
+l=n/2
 % transpose for Umap
-data = data./vecnorm(data,2,2);
-data_r = data(1:l,1:10000)';
-data_small = data(1:l,1:1000)';
+% data = data./vecnorm(data,2,2);
+data_r = data(1:l,1:1000);
+data_small = data(1:l,1:2000);
     
     
 % %
@@ -49,11 +254,11 @@ data_small = data(1:l,1:1000)';
 %   The output signals:
 
 figure()
-plot(data_r(:,1));hold on
-plot(data_r(:,2));
-plot(data_r(:,3));
-plot(data_r(:,4));
-plot(data_r(:,5));
+plot(data_r(1,:));hold on
+plot(data_r(2,:));
+plot(data_r(3,:));
+plot(data_r(4,:));
+% plot(data_r(:,5));
 title('Outputs 1-5');
     
 
@@ -78,60 +283,61 @@ title('Outputs 1-5');
         i = 2*(max_order)/l;
 %
 
-  nn= 20
-  
-    %[A,du1,C,du2,K,R,AUX] = subid(data_small,[],i,nn,[],[],1);
-    %[As,du1s,Cs,du2s,Ks,Rs,AUXs] = subid_stable(data_small,[],i,nn,[],[],1);
-
-           % [Ass,du1ss,Css,du2ss,Kss,Rss,AUXss] = subid_sparse(data_small,[],i,nn,[],[],1);
-
-    
-    
-    era = [];
-    for n = 1:20
-      [A,B,C,D,K,R] = subid(data_small,[],i,n,AUX,[],1);
-      [yp,erp] = predic(data_small,[],A,[],C,[],K);
-      era(n,:) = erp;
-    end
-    
-%   Hit any key
-
-
-%           
-%   We have now determined the prediction errors for all systems 
-%   from order 1 through 6.
-%   Plotting these often gives a clearer indication of the order:
+  nn= 8
 %   
-    subplot;
-    bar([1:20],era);title('Prediction error');
-    xlabel('System order');
-    
-%   It now even becomes more clear that the system order is 4.
-%    
-%   Hit any key
+%     [A,du1,C,du2,K,R,AUX] = subid(data_small,[],i,nn,[],[],1);
+%     %[As,du1s,Cs,du2s,Ks,Rs,AUXs] = subid_stable(data_small,[],i,nn,[],[],1);
+% 
+%            % [Ass,du1ss,Css,du2ss,Kss,Rss,AUXss] = subid_sparse(data_small,[],i,nn,[],[],1);
+% 
+%     
+%     
+%     era = [];
+%     for n = 1:20
+%       [A,B,C,D,K,R] = subid(data_small,[],i,n,[],[],1);
+%       [yp,erp] = predic(data_small,[],A,[],C,[],K);
+%       era(n,:) = erp;
+%     end
+%     
+% %   Hit any key
+% 
+% 
+% %           
+% %   We have now determined the prediction errors for all systems 
+% %   from order 1 through 6.
+% %   Plotting these often gives a clearer indication of the order:
+% %   
+%     subplot;
+%     bar([1:20],era);title('Prediction error');
+%     xlabel('System order');
+%     
+% %   It now even becomes more clear that the system order is 4.
+% %    
+% %   Hit any key
+% 
+% 
+% %   
+% %   We did find this very useful, so we included the above code in 
+% %   a function: allord.  The above result could have been obtained 
+% %   with the one line code:
+% %   
+%     [ersa,erpa] = allord(data_small,[],i,[1:20],AUX);
+% 
+% %   Hit any key
+% 
+% 
+% 
+% %   A last feature we would like to illustrate is that subid (or
+% %   the other stochastic identification algorithms) also
+% %   can work with another basis.     
+% %   The order of the system is then equal to the number of singular
+% %   values different from zero (instead of the number of angles
+% %   different from 90 degrees):
+    AUX=[];
 
+ [A,du1,C,du2,K,R,AUX] = subid(data_small,[],i,nn,[],[],1);
 
-%   
-%   We did find this very useful, so we included the above code in 
-%   a function: allord.  The above result could have been obtained 
-%   with the one line code:
-%   
-    [ersa,erpa] = allord(data_small,[],i,[1:20],AUX);
-
-%   Hit any key
-
-
-
-%   A last feature we would like to illustrate is that subid (or
-%   the other stochastic identification algorithms) also
-%   can work with another basis.     
-%   The order of the system is then equal to the number of singular
-%   values different from zero (instead of the number of angles
-%   different from 90 degrees):
-
-    [A,du1,C,du2,K,R] = subid(data_small,[],i,nn,AUX,'sv');
-    
-    [As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small,[],i,nn,AUX,'sv');
+ [As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small,[],i,nn,AUX,'sv');
     %[Asp,du1sp,Csp,du2sp,Ksp,Rsp,AUXsp] = subid_sparse2(data_small,[],i,nn,[],[],1);
 
 
@@ -151,7 +357,7 @@ title('Outputs 1-5');
 %              yp_k   = C xp_k + D u_k
 clc;
 close all
-T = 1000;
+T = length(data_small);
 [n m] = size(A);
 x = zeros(n,T);
 y = zeros(l,T);
@@ -159,7 +365,7 @@ y = zeros(l,T);
 
 
 for i = 1:T
-    x(:,i+1) = A*x(:,i) + K *( data_r(4000+(i-1),:)' - C*x(:,i) );
+    x(:,i+1) = A*x(:,i) + K *( data_small(:,i) - C*x(:,i) );
     y(:,i) = C*x(:,i);
 end
 
@@ -168,7 +374,7 @@ figure()
 for i=1:l
     subplot(5,3,i)
     plot(y(i,:));hold on;
-    plot(data_r(4000:5000,i))
+    plot(data_small(i,:))
 end
 
 
@@ -176,13 +382,16 @@ figure()
 for i=1:n
     subplot(5,4,i)
     plot(x(i,:));hold on;
+    plot(xpf(i,1:T));hold on;
 end
-x0 = x(:,end);
+% x0 = x(:,end);
 
 %% Forecast forward
 close all;
 T = 5000;
-T = 10000;
+data_f = data(1:l,2000:end);
+
+T = length(data_f);
 [n m] = size(A);
 x = zeros(n,T);
 y = zeros(l,T);
@@ -190,7 +399,7 @@ y = zeros(l,T);
 xs = zeros(n,T);
 ys = zeros(l,T);
 % data_f = data(1:l,5000:10000);
-data_f = data(1:l,:);
+
 %x(:,1) = x0;
 
 for i = 1:T
@@ -206,13 +415,14 @@ end
 dd = eig(A);
 
 
-% figure()
-% for i=1:n
-%     subplot(5,4,i)
-%     plot(x(i,1:1000));hold on;
-%     title(num2str(i))
-% end
-% sgtitle('Forecast latent states')
+figure()
+for i=1:n
+    subplot(5,4,i)
+    plot(x(i,1:1000));hold on;
+    plot(xpf(i,1:1000));hold on;
+    title(num2str(i))
+end
+sgtitle('Forecast latent states')
 
 figure()
 for i=1:n
@@ -226,7 +436,7 @@ figure()
 for i=1:l
     subplot(5,4,i)
     plot(data_f(i,1:1000),'k','Linewidth',2);hold on;
-    plot(y(i,1:1000),'b');
+    plot(ys(i,1:1000),'b');
     title(num2str(i))
 end
 sgtitle('Forecast outputs UMAP modes')
@@ -234,7 +444,7 @@ sgtitle('Forecast outputs UMAP modes')
 figure()
 for i=1:l
     plot(data_f(i,1:1000),'k','Linewidth',2);hold on;
-    plot(y(i,1:1000),'g');
+    plot(ys(i,1:1000),'g');
     title(num2str(i))
 end
 %%
@@ -248,7 +458,7 @@ end
 sgtitle('Latent states')
 
 figure()
-for i=1:6
+for i=1:l
     subplot(2,3,i)
     
     plot(ys(i,1500:1750),'g','Linewidth',2);hold on;
@@ -270,9 +480,9 @@ plot(data_f(3,1500:1750),'--b','Linewidth',1.5);hold on;
 
 plot(ys(4,1500:1750),'m','Linewidth',2);hold on;
 plot(data_f(4,1500:1750),'--m','Linewidth',1.5);hold on;
-
-plot(ys(5,1500:1750),'r','Linewidth',2);hold on;
-plot(data_f(5,1500:1750),'--r','Linewidth',1.5);hold on;
+% 
+% plot(ys(5,1500:1750),'r','Linewidth',2);hold on;
+% plot(data_f(5,1500:1750),'--r','Linewidth',1.5);hold on;
 legend('SysID','measured')
 
 %% 
@@ -293,7 +503,7 @@ plot(xs(5,1500:1750),'r','Linewidth',2);hold on;
 figure()
 for i=1:n
     subplot(5,4,i)
-    plot(x(i,4500:5000));hold on;
+    plot(xs(i,4500:5000));hold on;
     title(num2str(i))
 end
 sgtitle('Forecast latent states')
@@ -303,7 +513,7 @@ figure()
 for i=1:l
     subplot(2,5,i)
     plot(data_f(i,4500:5000),'k','Linewidth',2);hold on;
-    plot(y(i,4500:5000),'r');
+    plot(ys(i,4500:5000),'r');
     title(num2str(i))
 end
 sgtitle('Forecast outputs UMAP modes')
@@ -317,4 +527,11 @@ plot(ds,'or');
 
 
 %%
-e = max(abs(real(dd)))-1
+figure()
+for i=1:n
+    subplot(5,4,i)
+    plot(xs(i,4500:5000));hold on;
+    plot(xpf(i,4500:5000))
+    title(num2str(i))
+end
+sgtitle('Forecast latent states')

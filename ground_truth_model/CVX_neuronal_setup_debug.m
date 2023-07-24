@@ -10,11 +10,11 @@ digits(8);
 dt=0.1;
 t = 0:dt:100;
 
-t = 0:dt:100;
+t = 0:dt:20;
 
 %% Generate basis
 
-n = 4;
+n = 8;
 V = 0.5*ones(n,n) - rand(n);
 rank(V);
 
@@ -39,16 +39,20 @@ end
 [Q1, R1] =qr(V);
 %% EigV of random symmetric matrix (orthogonal eigenvalues)
 % 
-A = rand(n)+1; % random matrix
-A2 = A.*A';  % symmetric matrix
-
-
-% A = full(sprand(n,n,1));
-
-
-
-[P, J] = jordan(A2);
-P = real(P);
+%A = rand(n)+1; % random matrix
+% A = rand(n); % random matrix
+% A2 = A.*A';  % symmetric matrix
+% 
+% 
+% % A = full(sprand(n,n,1));
+% 
+% 
+% B = 2*(0.5 - rand(n)); % random matrix
+% % B = 1+  rand(n); % random matrix
+% [P, J] = jordan(A2);
+% [P2, J] = jordan(B);
+% P = real(P);
+% P2 = real(P2);
 %% Distribute eigenvalues (naive approach to generate marginally stable dynamics)
 
 %a = rand(n/2,1,"like",1i);
@@ -67,7 +71,7 @@ d = [a;b];
 d = sort(d);
 Ds = diag(d);
 
-D = 10*diag(sort([a0;b0]));
+D = 1*diag(sort([a0;b0]));
 
 
 %% New system
@@ -76,47 +80,38 @@ x0 = 0.5 - rand(n,1);
 
 %eps = 100;
 eps = 0.1;
-eps = 0.1;
+% eps = 0.05;
 
 EPS = [eye(n/2),zeros(n/2,n/2);
     zeros(n/2,n/2),1/eps*eye(n/2)];
 
 Dmix = EPS*D;
 
-%% Mix and Match 
+%%% Mix and Match 
 WF = full(sprand(n/2,n,1));
 NP = full(sprand(n/2,n,1));
 
 
-%% Alternative approach
-
-% Consider Block diagonal form M = [a -b;b a] for each complex conjugate
-% pair $\lambda = a \pm ib $  
+%%% Alternative approach 
 
 % generate blk diag from
-[Vnew Dnew] = cdf2rdf(Q1,D);
+[Vnew Dnn] = cdf2rdf(Q1,D);
 [Vmm Dmm] = cdf2rdf(Q1,Dmix);
-
+%%% 
 % 
-% [Vnew Dnew] = cdf2rdf(Q1,D);
-% [Vmm Dmm] = cdf2rdf(Q1,Dmix);
+% Anew = P*Dnn*inv(P)
+% 
+% 
+% Amix = P*Dmm*inv(P)
+% 
+% 
+% % 
+% Anew2 = B*Dnn*inv(B)
+% Amix2 = B*Dmm*inv(B)
 
+Anew = Q1*Dnn*inv(Q1)
+Amix = Q1*Dmm*inv(Q1)
 
-AA = Vnew*Dnew*Vnew';
-%% 
-% AAA = A*Dnew*inv(A);
-
-% Anew = A*Dnew*inv(A);
-% Amix = A*EPS*Dnew*inv(A);
-%P = inv(P);
-Anew = P*Dnew*inv(P);
-
-% Anew = Q1*Dnew*inv(Q1);
-
-%Amix = Q1*EPS*Dnew*inv(Q1);
-%Amix = Q1*Dmm*inv(Q1);
-
-Amix = P*Dmm*inv(P)
 % Eigen Decomposition
 
 [Un,Dn] = eig(Anew);
@@ -138,11 +133,11 @@ p=[];
 k=1;
 for i = t
     
-%     xp = [xp, expm(Anew^i)*x0];
-    xp = [xp, expm(Anew*i)*x0];
-    xpf = [xpf,expm(Amix*i)*x0];
-    xpu = [xpu,P*expm(Dmm*i)*inv(P)*x0];
-    p = [p,P*expm(Dmm*dt)^k*inv(P)*x0];
+
+    xp =  [xp,  expm(Anew*i)*x0];
+    xpf = [xpf, expm(Amix*i)*x0];
+    xpu = [xpu,Q1*expm(Dmm*i)*inv(Q1)*x0];
+    p = [p,Q1*expm(Dmm*dt)^k*inv(Q1)*x0];
     k = k+1;
 end
     ywf = WF*xpf;
@@ -173,6 +168,8 @@ figure()
 plot(t,p);
 title("latent dynamics via modes discrete")
 
+
+
 %% Add high freq noise
 close all;
 xp=[];
@@ -184,14 +181,18 @@ V =[];
 f = 10*rand(n,1);
 amp = 0.01*rand(n,1);
 
-phi = 3.14*rand(n,1);
+G = 0.5-rand(n);
+ 
+phi = 10*3.14*rand(n,1);
 for i = t
-    Cn  = [Cn, P*expm(Dnew*i)*inv(P)];
-    Cm  = [Cm, P*expm(Dmix*i)*inv(P)];
+    Cn  = [Cn, Q1*expm(Dnn*i)*inv(Q1)];
+    Cm  = [Cm, Q1*expm(Dmm*i)*inv(Q1)];
     v   = amp.*sin(f*i+phi);
     V = [v;V];
-    xp  = [xp,expm(Anew*i)*x0 + Cn*V];
-    xpf = [xpf,expm(Amix*i)*x0 + Cm*V];
+    xp  = [xp,  expm(Anew*i)*x0 + Cn*V];
+    xpf = [xpf, expm(Amix*i)*x0 + Cm*V];
+%     xp  = [xp,  expm(Anew*i)*x0 + G*Cn*V];
+%     xpf = [xpf, expm(Amix*i)*x0 + G*Cm*V];
 end
 V = reshape(V,n,length(t));
 ywf = WF*xpf;
@@ -217,47 +218,7 @@ figure()
 plot(t,V)
 title("noise")
 
-%% Verification
-close all;
-xp=[];
-xpf=[];
-f = 5;
-Cn =[];
-Cm =[];
-V =[];
-f = 10*rand(n,1);
-amp = 0.01*rand(n,1);
 
-phi = 3.14*rand(n,1);
-for i = t
-    Cm  = [Cm, P*expm(Dmix*i)*inv(P)];
-    v   = amp.*sin(f*i+phi);
-    V = [v;V];
-
-%     xpf = [xpf,expm(Um*Dm^(i)*Um)*x0 + Cm*V];
-    xpf = [xpf,expm(Amix*i)*x0 + Cm*V];
-
-end
-V = reshape(V,n,length(t));
-ywf = WF*xpf;
-ynp = NP*xpf;
-
-
-figure()
-plot(t,xpf);
-title("Verify")
-
-figure()
-plot(t,ywf);
-title("WF output")
-
-figure()
-plot(t,ynp);
-title("NP output")
-
-figure()
-plot(t,V)
-title("noise")
 %%
 T = 100;
 N = 200;
@@ -290,35 +251,35 @@ for i = 1:N
         G = real([G;cc]);
         
 end
+%%
+    cvx_begin 
+        variable B(n*(N))
+        minimize ((F*X0 + G*B)'*QN*(F*X0 + G*B) + B'*RN*B) 
+        subject to
+%         for i = 1:N
+%             
+%         end
+        
+    cvx_end
+    
+X = F*X0 + G*B;    
 
-%     cvx_begin 
-%         variable B(n*(N))
-%         minimize ((F*X0 + G*B)'*QN*(F*X0 + G*B) + B'*RN*B) 
-%         subject to
-% %         for i = 1:N
-% %             
-% %         end
-%         
-%     cvx_end
-%     
-% X = F*X0 + G*B;    
-% 
-% %
-% x = reshape(X,n,N);
-% b = reshape(B,n,N);
-% 
-% x = real([X0,x]);
-% 
-% %
-% close all;
-% figure()
-% plot(x(1,:));hold on;
-% plot(x(2,:));hold on;
-% plot(x(3,:));hold on;
-% plot(x(4,:));hold on;
-% 
-% figure()
-% plot(b');hold on;
+%
+x = reshape(X,n,N);
+b = reshape(B,n,N);
+
+x = real([X0,x]);
+
+%
+close all;
+figure()
+plot(x(1,:));hold on;
+plot(x(2,:));hold on;
+plot(x(3,:));hold on;
+plot(x(4,:));hold on;
+
+figure()
+plot(b');hold on;
 
 %%
 % % us = US(:,1:n);
@@ -375,32 +336,32 @@ end
 % Q = Um(:,1:2)*Um(:,1:2)';
 % 
 % eigs(Q)
-% %% Modal Supression
-% R = 1*eye(n);
-% %Q = 0.01*Um(:,1:2)*Um(:,1:2)'
-% 
-% 
-% Q = 1*Um(:,1:2)*Um(:,1:2)'
-% 
-% QN = kron(I,Q);
-% RN = kron(I,R);
-% 
-%     cvx_begin 
-%         variable B(n*(N))
-%         minimize ((F*X0 + G*B)'*QN*(F*X0 + G*B) + B'*RN*B) 
-%     cvx_end
-%     
-% X = F*X0 + G*B; 
-% x = reshape(X,n,N);
-% b = reshape(B,n,N);
-% 
-% %
-% figure()
-% plot(x');hold on;
-% title('modal suppression')
-% 
-% figure()
-% plot(b');hold on;
+%% Modal Supression
+R = 1*eye(n);
+%Q = 0.01*Um(:,1:2)*Um(:,1:2)'
+
+
+Q = 1*Um(:,1:2)*Um(:,1:2)'
+
+QN = kron(I,Q);
+RN = kron(I,R);
+
+    cvx_begin 
+        variable B(n*(N))
+        minimize ((F*X0 + G*B)'*QN*(F*X0 + G*B) + B'*RN*B) 
+    cvx_end
+    
+X = F*X0 + G*B; 
+x = reshape(X,n,N);
+b = reshape(B,n,N);
+
+%
+figure()
+plot(x');hold on;
+title('modal suppression')
+
+figure()
+plot(b');hold on;
 % %% Tests
 % i= 10
 % norm(F((i-1)*20+1: i*20 , :) - Um*Dm^(i)*Um',2)
@@ -415,10 +376,10 @@ end
 R = 1*eye(n);
 % Q = real(0.01*Um(:,3:4)*Um(:,3:4)')
 
-Q = 0.01*real(P*[0 0 0 0;
+Q = 0.01*real(Q1*[0 0 0 0;
      0 0 0 0 ;
      0 0 1 0; 
-     0 0 0 1]*inv(P));
+     0 0 0 1]*inv(Q1));
 
 l = 1;
 
@@ -433,7 +394,7 @@ l = 1;
 
 QN = kron(I,Q);
 RN = kron(I,R);
-delta = 0.01
+delta = 0.01;
 
 X0=x0;
 
@@ -459,7 +420,7 @@ x = [x0,x];
 b2 = reshape(B,n,N);
 x2 = reshape(X2,n,N);
 x2 = [x0,x2];
-x3 = [x0,x3];
+% x3 = [x0,x3];
 %%
 close all;
 t = 0:dt:dt*N;

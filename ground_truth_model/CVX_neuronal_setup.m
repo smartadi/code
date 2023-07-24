@@ -79,6 +79,8 @@ EPS = [eye(n/2),zeros(n/2,n/2);
 Dmix = diag(EPS*D);
 D = diag(D)
 
+
+%% Generate Block diagonal forms
 Dmm=[];
 for i=1:n/2
     dmm=[];
@@ -93,7 +95,7 @@ for i=1:n/2
     end
     Dmm = [Dmm;dmm];
 end
-Dmm
+
 
 Dnew=[];
 for i=1:n/2
@@ -109,7 +111,7 @@ for i=1:n/2
     end
     Dnew = [Dnew;dn];
 end
-Dnew
+
 %% New system
 
 x0 = 0.5 - rand(n,1);
