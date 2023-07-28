@@ -5,8 +5,8 @@ digits(8);
 s = 5;
 rng(s);
 % lamTda = - 0 - 5i;
-dt = 0.05;
-t = 0:dt:100;
+dt = 0.01;
+t = 0:dt:50;
 
 %% Generate Tasis
 
@@ -99,7 +99,7 @@ xp=[];
 xpu=[];
 xpf=[];
 p=[];
-k=1;
+k=0;
 for i = t
     
 
@@ -147,24 +147,41 @@ end
 % title("NP output")
 
 %% Add high freq noise
-% close all;
+close all;
 xp=[];
 xpf=[];
-f = 5;
 Cn =[];
 Cm =[];
 V =[];
-f = 10*rand(n,1);
-amp = 0.01*rand(n,1);
-G = 0.05*(0.5-rand(n));
-
+f = 1*rand(n,1);
+a = 0.01;
+amp = a*rand(n,1);
+G = 0.01*(0.5-rand(n));
+% G = eye(n);
 phi = 3.14*rand(n,1);
-for i = t
+k=0;
 
-    Cm  = [Cm, T*expm(Dmm*i)*inv(T)];
+for i = t
+    
+%     phi = 1;
+%     ff = f.*sin(phi*i);
+% 
+%     Cm  = [Cm, T*expm(Dmm*i)*inv(T)];
+%     v   = amp.*sin(ff*i+phi);
+%     V = [v;V];
+%     xpf = [xpf,expm(Amix*i)*x0 + G*Cm*V];
+    
+%     phi = 1;
+%     ff = f.*sin(phi*i);
+
+    Cm  = [Cm, Amdt^k];
     v   = amp.*sin(f*i+phi);
     V = [v;V];
-    xpf = [xpf,expm(Amix*i)*x0 + G*Cm*V];
+    xpf = [xpf,Amdt^k*x0 + G*Cm*V];
+    xp = [xp,Amdt^k*x0 ];
+
+    
+    k= k+1;
 end
 
 
@@ -174,6 +191,8 @@ ywf = WF*xpf + normrnd(0,0.05,n/2,length(t));
 ynp = NP*xpf + normrnd(0,0.05,n/2,length(t));
 
 
+%%
+close all
 figure()
 plot(t,xpf);
 title("latent dynamics time scaled")
@@ -190,13 +209,20 @@ figure()
 plot(t,V)
 title("noise")
 
+figure()
+plot(t,xp);
+title("latent dynamics no noise")
+
 %% Save Data
 
-writematrix([t',xpf'],'gt_dynamics.csv');
-writematrix([t',ywf'],'gt_WF_dynamics.csv');
-writematrix([t',ynp'],'gt_NP_dynamics.csv');
-writematrix([t',V'],'gt_harmonic_noise.csv');
-save("gt_model.mat","Amdt","T","Dmm","");
+% writematrix([t',xpf'],'gt_dynamics.csv');
+% writematrix([t',ywf'],'gt_WF_dynamics.csv');
+% writematrix([t',ynp'],'gt_NP_dynamics.csv');
+% writematrix([t',V'],'gt_harmonic_noise.csv');
+% save("gt_model.mat","Amdt","T","Dmm");
+
+
+
 % writematrix(Um,'gt_eigvec.csv');
 % writematrix(Dm,'gt_eigval.csv');
 % 

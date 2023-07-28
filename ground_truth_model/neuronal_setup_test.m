@@ -7,10 +7,10 @@ rng(s);
 digits(8);
 
 % US = double(table2array(readtable("data/data_WF_US_small.csv")));
-dt=0.1;
-t = 0:dt:100;
+dt=0.01;
+ t = 0:dt:100;
 
-t = 0:dt:20;
+% t = 0:dt:20;
 
 %%% Generate basis
 
@@ -56,12 +56,27 @@ P2 = real(P2);
 %%% Distribute eigenvalues (naive approach to generate marginally stable dynamics)
 
 %a = rand(n/2,1,"like",1i);
-delta = -0.1*rand(n/2,1); 
 
-a = delta + (rand(n/2,1)-.5)*1i;
+% delta = -0.01*rand(n/2,1);
+
+delta = -0.01*ones(n/2,1);
+
+% delta0 = 0*rand(n/2,1);
+
+eps = 0.1;
+% eps = 0.05;
+
+EPS = [eye(n/4),zeros(n/4,n/4);
+    zeros(n/4,n/4),1/eps*eye(n/4)];
+
+fr = (rand(n/2,1)-.5)
+fr2 = EPS*fr;
+a = delta + fr*1i;
+a2 = delta + fr2*1i;
 b = conj(a);
+b2 = conj(a2);
 
-a0 = 0*delta + (rand(n/2,1)-.5)*1i;
+a0 = 0*delta + fr2*1i;
 b0 = conj(a0);
 
 d0 = [a0;b0];
@@ -71,21 +86,16 @@ d = [a;b];
 d = sort(d);
 Ds = diag(d);
 
-D = 1*diag(sort([a0;b0]));
 
-
+D = 1*diag(sort([a;b]));
+Dmix = 1*diag(sort([a2;b2]));
+Dmix0 = 1*diag(sort([a0;b0]));
 %%% New system
 
 x0 = 0.5 - rand(n,1);
 
 %eps = 100;
-eps = 0.1;
-% eps = 0.05;
 
-EPS = [eye(n/2),zeros(n/2,n/2);
-    zeros(n/2,n/2),1/eps*eye(n/2)];
-
-Dmix = EPS*D;
 
 %%% Mix and Match 
 WF = full(sprand(n/2,n,1));
@@ -98,6 +108,7 @@ WF = WF-0.5;
 % generate blk diag from
 [Vnew Dnn] = cdf2rdf(Q1,D);
 [Vmm Dmm] = cdf2rdf(Q1,Dmix);
+[Vmm Dm0] = cdf2rdf(Q1,Dmix0);
 %%% 
 
 Anew = P*Dnn*inv(P)
@@ -110,6 +121,9 @@ Amix = P*Dmm*inv(P)
 Anew2 = B*Dnn*inv(B)
 Amix2 = B*Dmm*inv(B)
 
+
+Amix0 = B*Dm0*inv(B)
+
 Anew3 = Q1*Dnn*inv(Q1)
 Amix3 = Q1*Dmm*inv(Q1)
 
@@ -118,8 +132,8 @@ Amix3 = Q1*Dmm*inv(Q1)
 [Un,Dn] = eig(Anew);
 [Um,Dm] = eig(Amix);
 
-dt=0.1;
-Amdt = expm(Amix*dt)
+Amdt = expm(Amix2*dt)
+Amdt0 = expm(Amix0*dt)
 
 eig(Anew)
 eig(Amix)
@@ -240,11 +254,11 @@ f = 5;
 Cn =[];
 Cm =[];
 V =[];
-f = 10*rand(n,1);
-amp = 0.01*rand(n,1);
+f = 1*rand(n,1);
+amp = 0.02*rand(n,1);
 
-G = 0.5-rand(n);
- 
+G = (0.5-rand(n));
+G = 0.5*eye(n); 
 phi = 10*3.14*rand(n,1);
 for i = t
 %     Cn  = [Cn, P*expm(Dnn*i)*inv(P)];
@@ -285,32 +299,73 @@ title("noise")
 %% Verification
 close all;
 xp=[];
+xp0=[];
 xpf=[];
 f = 5;
 Cn =[];
 Cm =[];
 V =[];
-f = 1000*rand(n,1);
-amp = 0.1*rand(n,1);
+f = 10*rand(n,1);
+a = 0.002;
+amp = a*rand(n,1);
+
+% G = 0.5*(0.5-rand(n));
 
 phi = 3.14*rand(n,1);
+
+G = eye(n);
+
+k=0;
 for i = t
-    Cm  = [Cm, P*expm(Dmix*i)*inv(P)];
+%     Cm  = [Cm, expm(Amix*i)];
+    Cm  = [Cm, Amdt^k*G];
+
+%     ff = f.*sin(10*i); 
     v   = amp.*sin(f*i+phi);
     V = [v;V];
+%     xpf = [xpf,Amdt^k*x0 + G*Cm*V];
+    
+%     xpf = [xpf,expm(Amix*i)*x0 + G*Cm*V];
+    xpf = [xpf,Amdt^k*x0 + Cm*V];
 
-%     xpf = [xpf,expm(Um*Dm^(i)*Um)*x0 + Cm*V];
-    xpf = [xpf,expm(Amix*i)*x0 + Cm*V];
+%     xp = [xp,expm(Amix*i)*x0 ];
+    xp = [xp,Amdt^k*x0 ];
+    xp0 = [xp0,Amdt0^k*x0 ];
+%     xp0 = [xp0,expm(Amix0*i)*x0 ];
+    
+
+
+    
+    
+    
+    k=k+1;
 
 end
 V = reshape(V,n,length(t));
 ywf = WF*xpf ;
 ynp = NP*xpf ;
 
+%
+close all;
 
 figure()
 plot(t,xpf);
-title("Verify")
+title("noisy")
+
+figure()
+plot(t,xp);
+title("original")
+
+figure()
+plot(t,V)
+title("noise")
+
+figure()
+plot(t,xp0);
+title("marginal")
+%%
+
+
 
 figure()
 plot(t,ywf);
@@ -320,8 +375,5 @@ figure()
 plot(t,ynp);
 title("NP output")
 
-figure()
-plot(t,V)
-title("noise")
 
 
