@@ -134,7 +134,7 @@ Amix3 = Q1*Dmm*inv(Q1)
 
 Amdt = expm(Amix2*dt)
 Amdt0 = expm(Amix0*dt)
-
+T=B;
 eig(Anew)
 eig(Amix)
 %%
@@ -342,9 +342,10 @@ for i = t
 
 end
 V = reshape(V,n,length(t));
-ywf = WF*xpf ;
-ynp = NP*xpf ;
-
+% ywf = WF*xpf ;
+% ynp = NP*xpf ;
+ywf = WF*xpf + normrnd(0,0.02,n/2,length(t));
+ynp = NP*xpf + normrnd(0,0.02,n/2,length(t));
 %
 close all;
 
@@ -364,9 +365,6 @@ figure()
 plot(t,xp0);
 title("marginal")
 %%
-
-
-
 figure()
 plot(t,ywf);
 title("WF output")
@@ -374,6 +372,15 @@ title("WF output")
 figure()
 plot(t,ynp);
 title("NP output")
+%%
 
+% writematrix([t',xpf'],'data/test_gt_dynamics.csv');
+% writematrix([t',ywf'],'data/test_gt_WF_dynamics.csv');
+% writematrix([t',ynp'],'data/test_gt_NP_dynamics.csv');
+% writematrix([t',V'],'data/test_gt_harmonic_noise.csv');
+% save("data/test_gt_model.mat","Amdt","T","Dmm","x0");
+% writematrix(Um,'data/test_gt_eigvec.csv');
+% writematrix(Dm,'data/test_gt_eigval.csv');
+% writematrix(x0,'data/test_gt_init.csv');
 
 

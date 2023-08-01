@@ -1,11 +1,9 @@
 %
 % Demo file for Stochastic Subspace identification
 %
-% Copyright: 
-%          Peter Van Overschee, December 1995
-%          peter.vanoverschee@esat.kuleuven.ac.be
-%
 
+close all;
+clear all;
 clc
 echo off
 disp(' ')
@@ -14,34 +12,17 @@ disp('                SUBSPACE IDENTIFICATION ')
 disp('               -------------------------')
 disp(' ')
 
-disp('   This file will guide you through the world of time series')
-disp('   modeling with subspace identification algorithms.')
-disp('  ')
-disp('  ')
-disp('   Hit any key to continue')
-
-pause
-
-clc
-echo on
-%
-%   Consider a multivariable fourth order system a,k,c,r
-%   which is driven by white noise and generates an output y: 
-%   
-%               x_{k+1} = A x_k + K e_k
-%                y_k    = C x_k + e_k
-%              cov(e_k) = R
-echo off
 disp('loading WF PCA projections')
 %data = double(table2array(readtable('/home/nimbus/Documents/aditya/neuro/code/data/data_WF_UMAP_projections_small.csv')))';
 %data = double(table2array(readtable('/home/nimbus/Documents/aditya/neuro/code/data/data_WF_KPCA_projections_small.csv')));
 % data = double(table2array(readtable('/home/nimbus/Documents/aditya/neuro/code/data/data_WF_PCA_projections_small.csv')));
 
-data = real(yWF(:,1:5000)');
+data = double(table2array(readtable('/home/nimbus/Documents/aditya/neuro/code/ground_truth_model/data/test_gt_WF_dynamics.csv')));
+%%
+data = data(:,2:end);
 
-disp('   Hit any key to continue')
 
-[dims, time] = size(data);
+[time, dims] = size(data);
 pause
 echo off
 
@@ -51,15 +32,13 @@ echo off
 %    r = [0.01];
 %    l = 1; 				% Number of outputs
 
-l=5
+l = dims;
 % transpose for Umap
 
     
 
 
-%   Hit any key
-pause
-clc
+
 
 %   We will now identify this system from the data y 
 %   with the subspace identification algorithm: subid
@@ -78,9 +57,7 @@ clc
 %       must be an integer
         i = 2*(max_order)/l;
 %
-%   Hit any key
-pause
-clc
+
 %
 %   The subspace algorithms is now e asily started.
 %   Note the dummy outputs (du1 and du2) where normally the B and D 
@@ -128,7 +105,7 @@ clc
     plot([data(100:400,2),yp(100:400,2)])
     plot([data(100:400,3),yp(100:400,3)])
     plot([data(100:400,4),yp(100:400,4)])
-    plot([data(100:400,5),yp(100:400,5)])
+%     plot([data(100:400,5),yp(100:400,5)])
     title('Real (yellow) and predicted (purple) output')
 
 %   They coincide well.    
