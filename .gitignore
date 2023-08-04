@@ -9,6 +9,6 @@
 
 .pytest_cache/
 
-benv/
+/benv
 
-./idea
+/.idea
