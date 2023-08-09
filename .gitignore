@@ -12,3 +12,8 @@
 /benv
 
 /.idea
+
+
+/.venv
+.venv
+.venv/
