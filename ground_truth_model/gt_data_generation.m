@@ -4,9 +4,9 @@ clc;
 digits(8);
 s = 5;
 rng(s);
-% lamTda = - 0 - 5i;
-dt = 0.01;
-t = 0:dt:50;
+
+dt = 0.1;
+t = 0:dt:1000;
 
 %% Generate Tasis
 
@@ -16,7 +16,6 @@ rank(V);
 
 V = V./vecnorm(V,2,1);
 
-% V(:,1)'*V(:,2);
 
 %% Gram Schmidt
 
@@ -43,14 +42,45 @@ T = 0.1*(0.5 - rand(n)); % random matrix
 
 %% DistriTute eigenvalues (naive approach to generate marginally staTle dynamics)
 
-%a = rand(n/2,1,"like",1i);
-delta = -0.1*rand(n/2,1); 
+% %a = rand(n/2,1,"like",1i);
+% delta = -0.1*rand(n/2,1); 
+% 
+% % for staTle dynamics
+% a = delta + (rand(n/2,1)-.5)*1i;
+% b = conj(a);
+% 
+% a0 = 0*delta + (rand(n/2,1)-.5)*1i;
+% b0 = conj(a0);
+% 
+% d0 = [a0;b0];
+% d0 = sort(d0);
+% 
+% d = [a;b];
+% d = sort(d);
+% Ds = diag(d);
+% 
+% D = diag(sort([a0;b0]));
 
-% for staTle dynamics
-a = delta + (rand(n/2,1)-.5)*1i;
+
+
+% delta = -0.01*ones(n/2,1);
+delta = -0.001*ones(n/2,1);
+% delta0 = 0*rand(n/2,1);
+
+eps = 0.1;
+% eps = 0.05;
+eps = 10;
+EPS = [eye(n/4),zeros(n/4,n/4);
+    zeros(n/4,n/4),1/eps*eye(n/4)];
+
+fr = (rand(n/2,1)-.5)
+fr2 = EPS*fr;
+a = delta + fr*1i;
+a2 = delta + fr2*1i;
 b = conj(a);
+b2 = conj(a2);
 
-a0 = 0*delta + (rand(n/2,1)-.5)*1i;
+a0 = 0*delta + fr2*1i;
 b0 = conj(a0);
 
 d0 = [a0;b0];
@@ -60,15 +90,19 @@ d = [a;b];
 d = sort(d);
 Ds = diag(d);
 
-D = diag(sort([a0;b0]));
+
+D = 1*diag(sort([a;b]));
+Dmix = 1*diag(sort([a2;b2]));
+Dmix0 = 1*diag(sort([a0;b0]));
 
 %% New system
 x0 = 0.5 - rand(n,1);
-eps = 10; %slow
-eps = 0.25; %fast
-EPS = [eye(n/2),zeros(n/2,n/2);
-    zeros(n/2,n/2),1/eps*eye(n/2)];
-Dmix = EPS*D;
+x0 = x0/norm(x0);
+% eps = 10; %slow
+% eps = 0.25; %fast
+% EPS = [eye(n/2),zeros(n/2,n/2);
+%     zeros(n/2,n/2),1/eps*eye(n/2)];
+% Dmix = EPS*D;
 
 %% Mix and Match 
 WF = full(sprand(n/2,n,1));
@@ -77,12 +111,15 @@ NP = NP-0.5;
 WF = WF-0.5;
 %%
 % generate Tlk diag from
-[Vnew Dnn] = cdf2rdf(Q1,D);
-[Vmm Dmm] = cdf2rdf(Q1,Dmix);
+[Vnew dn] = cdf2rdf(Q1,D);
+[Vmm dm] = cdf2rdf(Q1,Dmix);
+[Vmm dm0] = cdf2rdf(Q1,Dmix0);
 
 
-Anew = T*Dnn*inv(T);
-Amix = T*Dmm*inv(T);
+
+Anew = T*dn*inv(T);
+Amix = T*dm*inv(T);
+Amix0 = T*dm0*inv(T);
 
 
 [Un,Dn] = eig(Anew);
@@ -90,6 +127,7 @@ Amix = T*Dmm*inv(T);
 
 
 Amdt = expm(Amix*dt);
+Amdt0 = expm(Amix0*dt);
 
 eig(Anew);
 eig(Amix);
@@ -105,13 +143,13 @@ for i = t
 
     xp =  [xp,  expm(Anew*i)*x0];
 %     xpf = [xpf, expm(Amix*i)*x0];
-%     xpu = [xpu,T*expm(Dmm*i)*inv(T)*x0];
+%     xpu = [xpu,T*expm(Amix0*i)*inv(T)*x0];
 %     p = [p,T*expm(Dmm*dt)^k*inv(T)*x0];
 %     k = k+1;
     
 %     xp =  [xp,  expm(Anew*i)*x0];
     xpf = [xpf, expm(Amix*i)*x0];
-    xpu = [xpu,T*expm(Dmm*i)*inv(T)*x0];
+    xpu = [xpu,T*expm(dm*i)*inv(T)*x0];
 %     p = [p,T*expm(Dmm*dt)^k*inv(T)*x0];
     p = [p,Amdt^k*x0];
 
@@ -120,31 +158,31 @@ end
     ywf = WF*xpf;
     ynp = NP*xpf;
     
-% close all;    
-% figure()
-% plot(t,xp);
-% title("latent dynamics")
-% 
-% figure()
-% plot(t,xpf);
-% title("latent dynamics time scaled")
-% 
-% figure()
-% plot(t,ywf);
-% title("WF output")
-% 
-% figure()
-% plot(t,ynp);
-% title("NP output")
-% 
-% figure()
-% plot(t,xpu);
-% title("latent dynamics via modes")
-% 
-% figure()
-% plot(t,p);
-% title("latent dynamics via modes discrete")
-% title("NP output")
+close all;    
+figure()
+plot(t,xp);
+title("latent dynamics")
+
+figure()
+plot(t,xpf);
+title("latent dynamics time scaled")
+
+figure()
+plot(t,ywf);
+title("WF output")
+
+figure()
+plot(t,ynp);
+title("NP output")
+
+figure()
+plot(t,xpu);
+title("latent dynamics via modes")
+
+figure()
+plot(t,p);
+title("latent dynamics via modes discrete")
+title("NP output")
 
 %% Add high freq noise
 close all;
@@ -191,7 +229,7 @@ ywf = WF*xpf + normrnd(0,0.05,n/2,length(t));
 ynp = NP*xpf + normrnd(0,0.05,n/2,length(t));
 
 
-%%
+%
 close all
 figure()
 plot(t,xpf);

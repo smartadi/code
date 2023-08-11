@@ -7,8 +7,9 @@ rng(s);
 digits(8);
 
 % US = double(table2array(readtable("data/data_WF_US_small.csv")));
-dt=0.01;
- t = 0:dt:100;
+dt=1;
+% t = 0:dt:100;
+t = 0:dt:5000;
 
 % t = 0:dt:20;
 
@@ -59,8 +60,8 @@ P2 = real(P2);
 
 % delta = -0.01*rand(n/2,1);
 
-delta = -0.01*ones(n/2,1);
-
+% delta = -0.01*ones(n/2,1);
+delta = -0.001*ones(n/2,1);
 % delta0 = 0*rand(n/2,1);
 
 eps = 0.1;

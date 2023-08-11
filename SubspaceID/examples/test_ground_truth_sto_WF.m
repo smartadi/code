@@ -60,7 +60,7 @@ title('Outputs 1-5');
 
 %   Say we don't know the order, but think it is maximally equal to 10.
 %   
-       max_order = 50;
+       max_order = 100;
 %        max_order = 60;
 %   
 %   As described in the help of subid we can determine "i" as follows:
@@ -70,7 +70,7 @@ title('Outputs 1-5');
         i = 2*(max_order)/l;
 %
 
-  nn= 10
+  nn= 8
 %   
      [A,du1,C,du2,K,R,AUX] = subid(data_small,[],i,nn,[],[],1);
 %     %[As,du1s,Cs,du2s,Ks,Rs,AUXs] = subid_stable(data_small,[],i,nn,[],[],1);
@@ -151,8 +151,8 @@ y = zeros(l,T);
 
 
 for i = 1:T
-    x(:,i+1) = A*x(:,i) + K *( data(:,i) - C*x(:,i) );
-    y(:,i) = C*x(:,i);
+    x(:,i+1) = As*x(:,i) + Ks *( data(:,i) - Cs*x(:,i) );
+    y(:,i) = Cs*x(:,i);
 end
 
 
@@ -172,7 +172,7 @@ end
 x0 = x(:,end);
 
 %% Forecast forward
-
+close all;
 T = 5000;
 [n m] = size(A);
 x = zeros(n,T);
@@ -183,8 +183,8 @@ x(:,1) = x0;
 
 for i = 1:T
     x(:,i+1) = A*x(:,i);% + K *( data_f(:,i) - C*x(:,i) );
-%     x(:,i+1) = As*x(:,i);% + K *( data_f(:,i) - C*x(:,i) );
-    y(:,i) = C*x(:,i);
+%      x(:,i+1) = As*x(:,i);% + Ks *( data_f(:,i) - Cs*x(:,i) );
+    y(:,i) = Cs*x(:,i);
 end
 
 
@@ -219,5 +219,5 @@ end
 
 %%
 
-% D = double(table2array(readtable('/home/nimbus/Documents/aditya/neuro/code/ground_truth_model/data/test_gt_eigval.csv')));
-% d = load('/home/nimbus/Documents/aditya/neuro/code/ground_truth_model/data/test_gt_model.mat');
+D = double(table2array(readtable('/home/nimbus/Documents/aditya/neuro/code/ground_truth_model/data/test_gt_eigval.csv')));
+d = load('/home/nimbus/Documents/aditya/neuro/code/ground_truth_model/data/test_gt_model.mat');
