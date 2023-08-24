@@ -86,7 +86,7 @@ tempn = temp[:r,:]/np.linalg.norm(temp[:r,:])
 
 # plt.plot(cam_times_short[:100],tempn[:100,:5])
 # plt.show()
-l = 5000
+l = 2500
 
 # res = next(x for x, val in enumerate(laser_on)
 #                                   if val > cam_times_short[l])

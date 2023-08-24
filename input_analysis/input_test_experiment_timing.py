@@ -57,15 +57,6 @@ t = np.linspace(t0,t0 + dt*(len(cam_times_short)-1),len(cam_times_short))
 
 
 
-plt.plot(laserX[:60],laserY[:60],'bo')
-plt.plot(laserX[60:120],laserY[60:120],'ro')
-plt.plot(laserX[120:180],laserY[120:180],'go')
-plt.plot(laserX[180:240],laserY[180:240],'ko')
-plt.plot(laserX[240:300],laserY[240:300],'mo')
-plt.xlabel("x")
-plt.ylabel("y")
-plt.title("input locations actual")
-plt.show()
 
 # plt.plot(power)
 # plt.show()
@@ -342,9 +333,21 @@ plt.plot(TlaserX[60:120],TlaserY[60:120],'ro')
 plt.plot(TlaserX[120:180],TlaserY[120:180],'go')
 plt.plot(TlaserX[180:240],TlaserY[180:240],'ko')
 plt.plot(TlaserX[240:300],TlaserY[240:300],'mo')
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("input locations commanded")
 plt.show()
 
 
+plt.plot(laserX[:60],laserY[:60],'bo')
+plt.plot(laserX[60:120],laserY[60:120],'ro')
+plt.plot(laserX[120:180],laserY[120:180],'go')
+plt.plot(laserX[180:240],laserY[180:240],'ko')
+plt.plot(laserX[240:300],laserY[240:300],'mo')
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("input locations actual")
+plt.show()
 
 print(TlaserX[0])
 print(TlaserY[0])
@@ -352,3 +355,28 @@ print(TlaserX[61])
 print(TlaserY[61])
 print(TlaserX[120])
 print(TlaserY[120])
+
+
+plt.plot(TlaserX[:60],TlaserY[:60],'bo')
+plt.plot(laserX[:60],laserY[:60],'ro')
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("input locations trial1")
+plt.show()
+
+
+plt.plot(laserX[60:120],laserY[60:120],'bo')
+plt.plot(TlaserX[60:120],TlaserY[60:120],'ro')
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("input locations trial2")
+plt.show()
+
+
+plt.plot(TlaserX[:60],TlaserY[:60],'bo')
+plt.plot(TlaserX[60:120],TlaserY[60:120],'ro')
+plt.plot(TlaserX[120:180],TlaserY[120:180],'go')
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("repeat issue between trial 1,2 and 3")
+plt.show()
