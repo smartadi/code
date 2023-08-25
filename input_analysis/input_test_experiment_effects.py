@@ -247,3 +247,21 @@ ax.vlines(x = laser_on[:res],ymin = -0.02, ymax = 0.02, color = 'k', label = 'in
 plt.show()
 
 
+
+
+plt.plot(cam_times_short[:l],En[:l],'r')
+plt.plot(cam_times_short[:l],E1[:l],'g')
+plt.plot(cam_times_short[:l],Eb[:l],'b')
+plt.plot(cam_times_short[:l],Eb1[:l],'k')
+plt.xlabel('time')
+plt.ylabel('energy')
+plt.show()
+
+
+
+fig, axs = plt.subplots(2,figsize=(9, 6))
+axs[0].plot(cam_times_short[:l],Eb[:l])
+axs[0].plot(cam_times_short[:l],En[:l])
+axs[1].plot(cam_times_short[:l],E1[:l])
+axs[1].plot(cam_times_short[:l],Eb1[:l])
+plt.show()
