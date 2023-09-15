@@ -302,6 +302,8 @@ for i in range(len(upos)):
     idx.append(np.where(np.all(pos==upos[i,:],axis=1)))
     
 idx_arr = np.concatenate(idx,axis=0)
+
+
 print(idx_arr)
 print(upos)
 
@@ -324,6 +326,7 @@ print(cam_times_short[int(nt)+1])
 # print(cam_times_short[int(nt)-1])
 # print(cam_times_short[int(nt)])
 # print(cam_times_short[int(nt)+1])
+
 
 train_size = int(15/dt)
 test_size = int(5/dt)
@@ -355,11 +358,11 @@ print(laser_on[[idx_arr[0,0]]])
 
 
 N = test_size
-Hdmd = HankelDMD_Predictor(400,5)
+Hdmd = HankelDMD_Predictor(400,10)
 n=50
 Hdmd.fit(train_id[:n,:].T)
 
-R = Hdmd.predict(N, reconstruct=False)
+#R = Hdmd.predict(N, reconstruct=True)
 R = Hdmd.predict(N, reconstruct=False)
 
 
@@ -383,9 +386,99 @@ ax.set(xlabel='time',ylabel = 'wf')
 #ax.vlines(x = laser_on[:res],ymin = -0.02, ymax = 0.02, color = 'k', label = 'input')
 plt.show()
 
-print(train_id[:r,-1])
-print(test_id[:r,0])
-print(test_id[:r,1])
-print(R[0,:r])
-print(R[1,:r]) 
 
+# print(train_id[:r,-2])
+# print(train_id[:r,-1])
+# print(test_id[:r,0])
+# print(R[0,:r])
+
+
+print(temp[:,0].T@temp[:,1].T)
+print(temp[:,0].shape)
+print(temp[0,:].shape)
+print(temp[:,:].shape)
+print(temp[0,:].T@temp[1,:])
+print(np.dot(temp[0,:],temp[0,:]))
+
+
+
+
+
+
+print(idx_arr)
+# print(upos)
+
+# print(laser_on[idx_arr[0,:]])
+
+# # group
+# print(laser_on[idx_arr[0,0]] - cam_times_short[0])
+# nt = int((laser_on[idx_arr[0,0]] - cam_times_short[0])/dt)
+# print(nt)
+# print(cam_times_short[int(nt)-2])
+# print(cam_times_short[int(nt)-1])
+# print(cam_times_short[int(nt)])
+# print(cam_times_short[int(nt)+1])
+
+
+
+# nt = (laser_on[idx_arr[0,1]] - cam_times_short[0])/dt
+# print(nt)
+# print(cam_times_short[int(nt)-2])
+# print(cam_times_short[int(nt)-1])
+# print(cam_times_short[int(nt)])
+# print(cam_times_short[int(nt)+1])
+
+
+train_size = int(15/dt)
+test_size = int(2/dt)
+train_id = tempn[:,nt-train_size:nt-1]
+time_id = cam_times_short[nt-train_size:nt-1]
+
+test_id = tempn[:,nt-1:nt+test_size]
+pred_id = cam_times_short[nt-1:nt+test_size]
+print(time_id[-1])
+
+
+err = np.zeros((9,10))
+
+for j in range(9):
+    for i in range(10):
+        nt = int((laser_on[idx_arr[j,i]] - cam_times_short[0])/dt)
+        train_id = tempn[:,nt-train_size:nt-1]
+        time_id = cam_times_short[nt-train_size:nt-1]
+
+        test_id = tempn[:,nt-1:nt+test_size]
+        pred_id = cam_times_short[nt-1:nt+test_size]
+
+        #print(nt)
+
+        N = test_size
+        Hdmd = HankelDMD_Predictor(400,10)
+        n=50
+        Hdmd.fit(train_id[:n,:].T)
+        R = Hdmd.predict(N, reconstruct=False)[:,:10]
+        # print(R.shape)
+        # print(pred_id.shape)
+
+
+
+        err[j,i] = np.linalg.norm(R - test_id[:10,1:].T,2)
+
+
+# print(err.shape)
+# print(err)
+
+
+# plt.plot(np.array(err),'bo')
+# plt.show()
+
+
+fig, axs = plt.subplots(8)
+axs[0].plot(err[0,:],'bo')
+axs[1].plot(err[1,:],'bo')
+axs[2].plot(err[2,:],'bo')
+axs[3].plot(err[3,:],'bo')
+axs[4].plot(err[4,:],'bo')
+axs[5].plot(err[5,:],'bo')
+axs[6].plot(err[6,:],'bo')
+axs[7].plot(err[7,:],'bo')
