@@ -18,4 +18,4 @@
 /.venv
 .venv
 .venv/
-/input_analysis/*.npy
+input_analysis/*.npy
