@@ -2,6 +2,7 @@
 /data
 *.asv
 
+*.csv
 
 # Jupyter Notebook
 .ipynb_checkpoints

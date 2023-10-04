@@ -1,3 +1,5 @@
+% Main script
+
 clear all;
 close all;
 clc;
@@ -7,8 +9,9 @@ rng(s);
 digits(8);
 
 % US = double(table2array(readtable("data/data_WF_US_small.csv")));
-dt=0.01;
- t = 0:dt:100;
+% dt=0.01;
+dt=1/35;
+t = 0:dt:100;
 
 % t = 0:dt:20;
 

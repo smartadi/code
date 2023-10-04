@@ -260,3 +260,6 @@ title("latent dynamics no noise")
 % end
 % % close the writer oTject
 % close(writerOTj);
+%%
+figure()
+plot(D,'bo')

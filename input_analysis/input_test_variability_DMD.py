@@ -22,7 +22,7 @@ print("read data")
 temp  = np.load(path + '/corr/svdTemporalComponents_corr.npy').T
 print("dynamics shape")
 print(temp.shape)
-# spat  = np.load(path + '/blue/svdSpatialComponents.npy')
+spat  = np.load(path + '/blue/svdSpatialComponents.npy')
 # print("Spatial shape")
 # print(spat.shape)
 
@@ -65,10 +65,13 @@ t = np.linspace(t0,t0 + dt*(len(cam_times_short)-1),len(cam_times_short))
 
 
 # normalising only r modes hides features
-tempn = temp[:r,:]/np.linalg.norm(temp[:r,:])
+# tempn = temp[:r,:]/np.linalg.norm(temp[:r,:])
 
 #
-tempn = temp[:,:]/np.linalg.norm(temp[:,:])
+tempn = temp[:,:].T/np.linalg.norm(temp[:,:])
+
+
+# SVn = SV[:5,:10000].T/np.linalg.norm(SV[:5,:n_ts])
 
 # plt.plot(cam_times_short[:100],tempn[:5,:100].T)
 # plt.show()
@@ -276,12 +279,12 @@ tempn = temp[:,:]/np.linalg.norm(temp[:,:])
 
 
 
-plt.plot(TlaserX,TlaserY,'bo')
-plt.plot(laserX,TlaserY,'ro')
-plt.xlabel("x")
-plt.ylabel("y")
-plt.title("input locations commanded")
-plt.show()
+# plt.plot(TlaserX,TlaserY,'bo')
+# plt.plot(laserX,TlaserY,'ro')
+# plt.xlabel("x")
+# plt.ylabel("y")
+# plt.title("input locations commanded")
+# plt.show()
 
 
 
@@ -393,12 +396,15 @@ plt.show()
 # print(R[0,:r])
 
 
-print(temp[:,0].T@temp[:,1].T)
-print(temp[:,0].shape)
-print(temp[0,:].shape)
-print(temp[:,:].shape)
-print(temp[0,:].T@temp[1,:])
-print(np.dot(temp[0,:],temp[0,:]))
+
+fig, axs = plt.subplots(6)
+axs[0].plot(tempn[:5,:5000].T)
+axs[1].plot(tempn[:5,:1000].T)
+axs[2].plot(tempn[:5,10000:11000].T)
+axs[3].plot(tempn[:5,20000:21000].T)
+axs[4].plot(tempn[:5,30000:31000].T)
+# axs[5].plot(tempn[:5,40000:41000].T)
+plt.show()
 
 
 
@@ -439,46 +445,46 @@ pred_id = cam_times_short[nt-1:nt+test_size]
 print(time_id[-1])
 
 
-err = np.zeros((9,10))
+# err = np.zeros((9,10))
 
-for j in range(9):
-    for i in range(10):
-        nt = int((laser_on[idx_arr[j,i]] - cam_times_short[0])/dt)
-        train_id = tempn[:,nt-train_size:nt-1]
-        time_id = cam_times_short[nt-train_size:nt-1]
+# for j in range(9):
+#     for i in range(10):
+#         nt = int((laser_on[idx_arr[j,i]] - cam_times_short[0])/dt)
+#         train_id = tempn[:,nt-train_size:nt-1]
+#         time_id = cam_times_short[nt-train_size:nt-1]
 
-        test_id = tempn[:,nt-1:nt+test_size]
-        pred_id = cam_times_short[nt-1:nt+test_size]
+#         test_id = tempn[:,nt-1:nt+test_size]
+#         pred_id = cam_times_short[nt-1:nt+test_size]
 
-        #print(nt)
+#         #print(nt)
 
-        N = test_size
-        Hdmd = HankelDMD_Predictor(400,10)
-        n=50
-        Hdmd.fit(train_id[:n,:].T)
-        R = Hdmd.predict(N, reconstruct=False)[:,:10]
-        # print(R.shape)
-        # print(pred_id.shape)
-
-
-
-        err[j,i] = np.linalg.norm(R - test_id[:10,1:].T,2)
+#         N = test_size
+#         Hdmd = HankelDMD_Predictor(400,10)
+#         n=50
+#         Hdmd.fit(train_id[:n,:].T)
+#         R = Hdmd.predict(N, reconstruct=False)[:,:10]
+#         # print(R.shape)
+#         # print(pred_id.shape)
 
 
-# print(err.shape)
-# print(err)
+
+#         err[j,i] = np.linalg.norm(R - test_id[:10,1:].T,2)
 
 
-# plt.plot(np.array(err),'bo')
-# plt.show()
+# # print(err.shape)
+# # print(err)
 
 
-fig, axs = plt.subplots(8)
-axs[0].plot(err[0,:],'bo')
-axs[1].plot(err[1,:],'bo')
-axs[2].plot(err[2,:],'bo')
-axs[3].plot(err[3,:],'bo')
-axs[4].plot(err[4,:],'bo')
-axs[5].plot(err[5,:],'bo')
-axs[6].plot(err[6,:],'bo')
-axs[7].plot(err[7,:],'bo')
+# # plt.plot(np.array(err),'bo')
+# # plt.show()
+
+
+# fig, axs = plt.subplots(8)
+# axs[0].plot(err[0,:],'bo')
+# axs[1].plot(err[1,:],'bo')
+# axs[2].plot(err[2,:],'bo')
+# axs[3].plot(err[3,:],'bo')
+# axs[4].plot(err[4,:],'bo')
+# axs[5].plot(err[5,:],'bo')
+# axs[6].plot(err[6,:],'bo')
+# axs[7].plot(err[7,:],'bo')

@@ -40,8 +40,8 @@ A = 0.5-rand(n);
 A2 = A.*A';
 
 % Computation time increas
-% [P, J] = jordan(A2);
-% P = real(P);
+[P, J] = jordan(A2);
+P = real(P);
 
 B = 2*(0.5 - rand(n)); % random matrix
 %% Distribute eigenvalues (naive approach to generate marginally stable dynamics)
