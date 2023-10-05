@@ -26,9 +26,11 @@ print(temp.shape)
 spat  = np.load(path + '/blue/svdSpatialComponents.npy')
 
 
-# cam_times = np.load(path + '/cameraFrameTimes.npy')
+cam_times = np.load(path + '/corr/svdTemporalComponents_corr.timestamps.npy')
 
-# print(cam_times.shape)
+print(cam_times.shape)
+print(cam_times[0])
+print(cam_times[-1])
 # cam_times_short = cam_times[::2]
 # print("camera times")
 # print(cam_times_short.shape)
@@ -37,7 +39,7 @@ print("data rank")
 r = 10
 print(r)
 
-#dt = 1/35
+# dt = 1/35
 # dt = 0.02857 # fixed
 # t0 = cam_times_short[0]
 # t = np.linspace(t0,t0 + dt*(len(cam_times_short)-1),len(cam_times_short))
