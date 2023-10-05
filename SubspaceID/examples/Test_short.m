@@ -17,7 +17,7 @@ disp('loading WF PCA projections')
 
 [dims, time] = size(data1);
 %%
-n=10;
+n=5;
 l=n;
 % transpose for Umap
 % data = data./vecnorm(data,2,2);
@@ -44,7 +44,7 @@ data_small = data1(1:l,1:1000);
 
 %   Say we don't know the order, but think it is maximally equal to 10.
 %   
-       max_order = 50;
+       max_order = 60;
 %   
 %   As described in the help of subid we can determine "i" as follows:
 %   
@@ -52,7 +52,7 @@ data_small = data1(1:l,1:1000);
 %       must be an integer
         p = 2*(max_order)/l;
 
-  nn= 10;
+  nn= 6;
   AUX=[];
 
  [A,du1,C,du2,K,R,AUX] = subid(data_small,[],p,nn,[],[],1);
@@ -263,54 +263,89 @@ sgtitle('Forecast latent states')
 % legend('unstable','stable')
 %%
 
-nn=6
+nn = 6
+D=[];
 Ds=[];
 si = 500;
 ss = 10000/si; 
 for j = 1:ss
     
-data_small = data1(1:l,si*(j-1)+1 : j*si);
+data_small1 = data1(1:l,si*(j-1)+1 : j*si);
 AUX=[];
 p
- % [A,du1,C,du2,K,R,AUX] = subid(data_small,[],p,nn,[],[],1);
+ [A,du1,C,du2,K,R,AUX] = subid(data_small1,[],p,nn,[],[],1);
 
-[As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small,[],p,nn,AUX,'sv');
+[As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small1,[],p,nn,AUX,'sv');
 
-    %dd2 = eig(A)
-    % Ds = [Ds,eig(A)];
+    D = [D,eig(A)];
     Ds = [Ds,eig(As)];
 eig(A)
 end
 %%
 Ds2=[];
+D2=[];
+
 for j = 1:ss
     
-data_small = data2(1:l,si*(j-1)+1 : j*si);
+data_small2 = data2(1:l,si*(j-1)+1 : j*si);
 AUX=[];
 p
- % [A,du1,C,du2,K,R,AUX] = subid(data_small,[],p,nn,[],[],1);
+ [A,du1,C,du2,K,R,AUX] = subid(data_small2,[],p,nn,[],[],1);
 
-[As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small,[],p,nn,AUX,'sv');
+[As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small2,[],p,nn,AUX,'sv');
 
-    %dd2 = eig(A)
-    % Ds2 = [Ds2,eig(A)];
+    D2 = [D2,eig(A)];
     Ds2 = [Ds2,eig(As)];
 
 end
 %%
 Ds3=[];
+D3=[];
+
 for j = 1:ss
     
-data_small = data3(1:l,si*(j-1)+1 : j*si);
+data_small3 = data3(1:l,si*(j-1)+1 : j*si);
 AUX=[];
 p
- % [A,du1,C,du2,K,R,AUX] = subid(data_small,[],p,nn,[],[],1);
+ [A,du1,C,du2,K,R,AUX] = subid(data_small3,[],p,nn,[],[],1);
 
-[As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small,[],p,nn,AUX,'sv');
+[As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small3,[],p,nn,AUX,'sv');
 
-    %dd2 = eig(A)
-    % Ds3 = [Ds3,eig(A)];
+    D3 = [D3,eig(A)];
     Ds3 = [Ds3,eig(As)];
+
+end
+%%
+Ds4=[];
+D4=[];
+
+for j = 1:ss
+    
+data_small4 = data4(1:l,si*(j-1)+1 : j*si);
+AUX=[];
+p
+[A,du1,C,du2,K,R,AUX] = subid(data_small4,[],p,nn,[],[],1);
+
+[As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small4,[],p,nn,AUX,'sv');
+
+    D4 = [D4,eig(A)];
+    Ds4 = [Ds4,eig(As)];
+
+end
+Ds5=[];
+D5=[];
+
+for j = 1:ss
+    
+data_small5 = data5(1:l,si*(j-1)+1 : j*si);
+AUX=[];
+p
+[A,du1,C,du2,K,R,AUX] = subid(data_small5,[],p,nn,[],[],1);
+
+[As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small5,[],p,nn,AUX,'sv');
+
+    D5 = [D5,eig(A)];
+    Ds5 = [Ds5,eig(As)];
 
 end
 
@@ -320,6 +355,10 @@ figure()
 plot(Ds,'or'); hold on;
 plot(Ds2,'ob');
 plot(Ds3,'og');
+plot(Ds4,'ok');
+plot(Ds5,'om');
+
+
 
 %%
 
@@ -329,8 +368,41 @@ close all;
 cDs = Ds/dt;
 cDs2 = Ds2/dt;
 cDs3 = Ds3/dt;
-t= 1:1:length(Ds);
+cDs4 = Ds4/dt;
+cDs5 = Ds5/dt;
+
+cD = D/dt;
+cD2 = D2/dt;
+cD3 = D3/dt;
+cD4 = D4/dt;
+cD5 = D5/dt;
+
+t= 1:1:ss;
 figure()
 plot(t,abs(imag(cDs)),'or'); hold on;
 plot(t,abs(imag(cDs2)),'ob');hold on;
 plot(t,abs(imag(cDs3)),'og');hold on;
+plot(t,abs(imag(cDs4)),'ok');hold on;
+plot(t,abs(imag(cDs5)),'om');hold on;
+
+t= 1:1:ss;
+figure()
+plot(t,abs(imag(cD)),'or'); hold on;
+plot(t,abs(imag(cD2)),'ob');hold on;
+plot(t,abs(imag(cD3)),'og');hold on;
+plot(t,abs(imag(cD4)),'ok');hold on;
+plot(t,abs(imag(cD5)),'om');hold on;
+%%
+figure()
+plot(t,abs(imag(cDs)),'or'); hold on;
+%%
+j=7
+figure()
+subplot(4,1,1)
+plot(data_small1')
+subplot(4,1,2)
+plot(data_small2')
+subplot(4,1,3)
+plot(data_small3')
+subplot(4,1,4)
+plot(data3(1:l,si*(j-1)+1 : j*si)')
