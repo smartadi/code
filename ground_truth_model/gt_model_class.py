@@ -4,7 +4,7 @@ from scipy.integrate import solve_ivp
 from scipy.signal import cont2discrete, lti, dlti, dstep
 from scipy import signal
 from scipy.integrate import odeint
-
+from scipy.stats import ortho_group
 
 class ground_truth():
     """
@@ -29,16 +29,23 @@ class ground_truth():
         self._d = d
         self.dt = 1/35  # experiment frequency matches sim frequency in discrete time
         self.t = np.linspace(0,self.dt*(self.N-1),self.N)
-        self.D = self._eigs()
-        self.blk = self.get_blk_diag()
-        self.A = self._sys_mat()
-        self._sim()
+        
+
+        #self.US = np.load(path + '/blue/svdSpatialComponents.npy')
+
         
         # noise parameters
 
         # disturbance parameters
+        self._a = np.random.uniform(0,1,self._d)
         self._phi = np.random.uniform(-np.pi/2,-np.pi/2,self._d)
-        self._omega = np.random.uniform(0,10,self._d)   # omega = 2*pi*f
+        self._omega = np.random.uniform(0,1,self._d)   # omega = 2*pi*f
+
+
+        self.D = self._eigs()
+        self.blk = self.get_blk_diag()
+        self.A = self._sys_mat()
+        self.temp = self._sim()
     
 
     def _eigs(self):
@@ -68,8 +75,14 @@ class ground_truth():
     
     def _sys_mat(self):
         B = np.random.uniform(-0.5,0.5,(self._d,self._d))
+
+        P = ortho_group.rvs(dim=self._d)
+
+        print(P)
+        print(P.dot(P.T))
         
-        A = B@self.blk@np.linalg.inv(B)
+        # A = B@self.blk@np.linalg.inv(B)
+        A = P@self.blk@np.linalg.inv(P)
         # print(A)
         return A
     
@@ -77,12 +90,13 @@ class ground_truth():
         x0 = np.random.uniform(-0.5,0.5,(self._d,1)).T
         x0 = x0/np.linalg.norm(x0)
         x0 = x0.ravel()
+        print(np.linalg.norm(x0))
         print(x0)
         def model(x,t):
             noise = np.random.normal(0,0.0000001,self._d)
             distb = self._a*np.sin(self._omega*t+self._phi)
-            
-            return (self.A@x)
+             
+            return (self.A@x + distb)
 
         
         t = np.linspace(0,1000,35*1000+1)
@@ -93,11 +107,14 @@ class ground_truth():
         plt.xlabel('Time')
         plt.ylabel('Response (y)')
         plt.show()
+
+        return y
         
     
         
         
 G = ground_truth(1000,10)
+
 # plt.plot(G.D.real,G.D.imag,'bo')
 # plt.show()
 

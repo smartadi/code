@@ -64,6 +64,7 @@ D = diag(sort([a0;b0]));
 
 %% New system
 x0 = 0.5 - rand(n,1);
+x0 = x0/norm(x0);
 eps = 10; %slow
 eps = 0.25; %fast
 EPS = [eye(n/2),zeros(n/2,n/2);
@@ -83,6 +84,9 @@ WF = WF-0.5;
 
 Anew = T*Dnn*inv(T);
 Amix = T*Dmm*inv(T);
+
+Anew = Q1*Dnn*Q1';
+Amix = Q1*Dmm*Q1';
 
 
 [Un,Dn] = eig(Anew);

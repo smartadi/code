@@ -6,16 +6,29 @@ clc;
 dt = 0.0285;
 t = 0:dt:dt*1000;
 
-data1 = double(table2array(readtable('/home/mist/Documents/projects/Brain/code/tempn1.csv')));
-data2 = double(table2array(readtable('/home/mist/Documents/projects/Brain/code/tempn2.csv')));
-data3 = double(table2array(readtable('/home/mist/Documents/projects/Brain/code/tempn3.csv')));
-data4 = double(table2array(readtable('/home/mist/Documents/projects/Brain/code/tempn4.csv')));
-data5 = double(table2array(readtable('/home/mist/Documents/projects/Brain/code/tempn5.csv')));
+% data1 = double(table2array(readtable('/home/mist/Documents/projects/Brain/code/tempn1.csv')));
+% data2 = double(table2array(readtable('/home/mist/Documents/projects/Brain/code/tempn2.csv')));
+% data3 = double(table2array(readtable('/home/mist/Documents/projects/Brain/code/tempn3.csv')));
+% data4 = double(table2array(readtable('/home/mist/Documents/projects/Brain/code/tempn4.csv')));
+% data5 = double(table2array(readtable('/home/mist/Documents/projects/Brain/code/tempn5.csv')));
 
+path = "/run/user/1001/gvfs/smb-share:server=steinmetzsuper1.biostr.washington.edu,share=data/Subjects/ZYE_0069/2023-10-03/1";
+upath = '/corr/svdSpatialComponents_ortho.npy';
+upath = append(path,upath);
+vpath = '/corr/svdTemporalComponents_ortho.npy';
+vpath = append(path,vpath);
+
+
+U = readUfromNPY(upath);
+V = readVfromNPY(vpath);
+
+size(V)
+V = V./vecnorm(V,2,2);
 
 disp('loading WF PCA projections')
 
-[dims, time] = size(data1);
+data1=V';
+N=10000;
 %%
 n=5;
 l=n;
@@ -23,6 +36,7 @@ l=n;
 % data = data./vecnorm(data,2,2);
 % data_r = data1(1:l,1:1000);
 % data_small = data1(1:l,1:2000);
+dl = 5000
 data_small = data1(1:l,1:1000);
 
 % figure()
@@ -44,7 +58,7 @@ data_small = data1(1:l,1:1000);
 
 %   Say we don't know the order, but think it is maximally equal to 10.
 %   
-       max_order = 60;
+       max_order = 10;
 %   
 %   As described in the help of subid we can determine "i" as follows:
 %   
@@ -52,7 +66,7 @@ data_small = data1(1:l,1:1000);
 %       must be an integer
         p = 2*(max_order)/l;
 
-  nn= 6;
+  nn= 10;
   AUX=[];
 
  [A,du1,C,du2,K,R,AUX] = subid(data_small,[],p,nn,[],[],1);
@@ -155,74 +169,74 @@ for i=1:l
     title(num2str(i))
 end
 %%
-close all;
-figure()
-for i=1:6
-    subplot(2,3,i)
-    plot(xs(i,1500:1750),'b','Linewidth',2);hold on;
-    title(num2str(i))
-end
-sgtitle('Latent states')
-
-figure()
-for i=1:l
-    subplot(2,5,i)
-    
-    plot(ys(i,1500:1750),'g','Linewidth',2);hold on;
-    plot(data_f(i,1500:1750),'--k');hold on;
-    title(num2str(i))
-end
-sgtitle('Output modes')
-%%
-close all
-figure()
-plot(ys(1,1500:1750),'k','Linewidth',2);hold on;
-plot(data_f(1,1500:1750),'--k','Linewidth',1.5);hold on;
-
-plot(ys(2,1500:1750),'g','Linewidth',2);hold on;
-plot(data_f(2,1500:1750),'--g','Linewidth',1.5);hold on;
-
-plot(ys(3,1500:1750),'b','Linewidth',2);hold on;
-plot(data_f(3,1500:1750),'--b','Linewidth',1.5);hold on;
-
-plot(ys(4,1500:1750),'m','Linewidth',2);hold on;
-plot(data_f(4,1500:1750),'--m','Linewidth',1.5);hold on;
+% close all;
+% figure()
+% for i=1:n
+%     subplot(2,3,i)
+%     plot(xs(i,1500:1750),'b','Linewidth',2);hold on;
+%     title(num2str(i))
+% end
+% sgtitle('Latent states')
 % 
-% plot(ys(5,1500:1750),'r','Linewidth',2);hold on;
-% plot(data_f(5,1500:1750),'--r','Linewidth',1.5);hold on;
-legend('SysID','measured')
+% figure()
+% for i=1:l
+%     subplot(2,5,i)
+% 
+%     plot(ys(i,1500:1750),'g','Linewidth',2);hold on;
+%     plot(data_f(i,1500:1750),'--k');hold on;
+%     title(num2str(i))
+% end
+% sgtitle('Output modes')
+%%
+% close all
+% figure()
+% plot(ys(1,1500:1750),'k','Linewidth',2);hold on;
+% plot(data_f(1,1500:1750),'--k','Linewidth',1.5);hold on;
+% 
+% plot(ys(2,1500:1750),'g','Linewidth',2);hold on;
+% plot(data_f(2,1500:1750),'--g','Linewidth',1.5);hold on;
+% 
+% plot(ys(3,1500:1750),'b','Linewidth',2);hold on;
+% plot(data_f(3,1500:1750),'--b','Linewidth',1.5);hold on;
+% 
+% plot(ys(4,1500:1750),'m','Linewidth',2);hold on;
+% plot(data_f(4,1500:1750),'--m','Linewidth',1.5);hold on;
+% % 
+% % plot(ys(5,1500:1750),'r','Linewidth',2);hold on;
+% % plot(data_f(5,1500:1750),'--r','Linewidth',1.5);hold on;
+% legend('SysID','measured')
 
 %% 
-close all
-figure()
-plot(xs(1,1500:1750),'k','Linewidth',2);hold on;
-
-plot(xs(2,1500:1750),'g','Linewidth',2);hold on;
-
-plot(xs(3,1500:1750),'b','Linewidth',2);hold on;
-
-plot(xs(4,1500:1750),'m','Linewidth',2);hold on;
-
-plot(xs(5,1500:1750),'r','Linewidth',2);hold on;
-
-%%
-figure()
-for i=1:n
-    subplot(5,4,i)
-    plot(xs(i,4500:5000));hold on;
-    title(num2str(i))
-end
-sgtitle('Forecast latent states')
-
-
-figure()
-for i=1:l
-    subplot(2,5,i)
-    plot(data_f(i,4500:5000),'k','Linewidth',2);hold on;
-    plot(ys(i,4500:5000),'r');
-    title(num2str(i))
-end
-sgtitle('Forecast outputs UMAP modes')
+% close all
+% figure()
+% plot(xs(1,1500:1750),'k','Linewidth',2);hold on;
+% 
+% plot(xs(2,1500:1750),'g','Linewidth',2);hold on;
+% 
+% plot(xs(3,1500:1750),'b','Linewidth',2);hold on;
+% 
+% plot(xs(4,1500:1750),'m','Linewidth',2);hold on;
+% 
+% plot(xs(5,1500:1750),'r','Linewidth',2);hold on;
+% 
+% %%
+% figure()
+% for i=1:n
+%     subplot(5,4,i)
+%     plot(xs(i,4500:5000));hold on;
+%     title(num2str(i))
+% end
+% sgtitle('Forecast latent states')
+% 
+% 
+% figure()
+% for i=1:l
+%     subplot(2,5,i)
+%     plot(data_f(i,4500:5000),'k','Linewidth',2);hold on;
+%     plot(ys(i,4500:5000),'r');
+%     title(num2str(i))
+% end
+% sgtitle('Forecast outputs UMAP modes')
 
 %%
 dd = eig(A)
@@ -263,11 +277,13 @@ sgtitle('Forecast latent states')
 % legend('unstable','stable')
 %%
 
-nn = 6
+
 D=[];
 Ds=[];
 si = 500;
 ss = 10000/si; 
+
+Vd = zeros(nn,nn,ss)
 for j = 1:ss
     
 data_small1 = data1(1:l,si*(j-1)+1 : j*si);
@@ -276,6 +292,10 @@ p
  [A,du1,C,du2,K,R,AUX] = subid(data_small1,[],p,nn,[],[],1);
 
 [As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data_small1,[],p,nn,AUX,'sv');
+
+    [E,V] = eig(A)
+    
+    Vd(:,:,ss) = V;
 
     D = [D,eig(A)];
     Ds = [Ds,eig(As)];
@@ -287,7 +307,7 @@ D2=[];
 
 for j = 1:ss
     
-data_small2 = data2(1:l,si*(j-1)+1 : j*si);
+data_small2 = data1(1:l,N+ si*(j-1)+1 : N+j*si);
 AUX=[];
 p
  [A,du1,C,du2,K,R,AUX] = subid(data_small2,[],p,nn,[],[],1);
@@ -304,7 +324,7 @@ D3=[];
 
 for j = 1:ss
     
-data_small3 = data3(1:l,si*(j-1)+1 : j*si);
+data_small3 = data1(1:l,2*N+si*(j-1)+1 : 2*N+j*si);
 AUX=[];
 p
  [A,du1,C,du2,K,R,AUX] = subid(data_small3,[],p,nn,[],[],1);
@@ -321,7 +341,7 @@ D4=[];
 
 for j = 1:ss
     
-data_small4 = data4(1:l,si*(j-1)+1 : j*si);
+data_small4 = data1(1:l,3*N+si*(j-1)+1 : 3*N+j*si);
 AUX=[];
 p
 [A,du1,C,du2,K,R,AUX] = subid(data_small4,[],p,nn,[],[],1);
@@ -337,7 +357,7 @@ D5=[];
 
 for j = 1:ss
     
-data_small5 = data5(1:l,si*(j-1)+1 : j*si);
+data_small5 = data1(1:l,4*N+si*(j-1)+1 : 4*N+j*si);
 AUX=[];
 p
 [A,du1,C,du2,K,R,AUX] = subid(data_small5,[],p,nn,[],[],1);
@@ -357,6 +377,7 @@ plot(Ds2,'ob');
 plot(Ds3,'og');
 plot(Ds4,'ok');
 plot(Ds5,'om');
+title('stable eigenvalues')
 
 
 
@@ -384,6 +405,7 @@ plot(t,abs(imag(cDs2)),'ob');hold on;
 plot(t,abs(imag(cDs3)),'og');hold on;
 plot(t,abs(imag(cDs4)),'ok');hold on;
 plot(t,abs(imag(cDs5)),'om');hold on;
+title('Stable continuous')
 
 t= 1:1:ss;
 figure()
@@ -392,17 +414,20 @@ plot(t,abs(imag(cD2)),'ob');hold on;
 plot(t,abs(imag(cD3)),'og');hold on;
 plot(t,abs(imag(cD4)),'ok');hold on;
 plot(t,abs(imag(cD5)),'om');hold on;
+title('continuous')
+
 %%
 figure()
 plot(t,abs(imag(cDs)),'or'); hold on;
+title('one window continuous stable')
 %%
-j=7
-figure()
-subplot(4,1,1)
-plot(data_small1')
-subplot(4,1,2)
-plot(data_small2')
-subplot(4,1,3)
-plot(data_small3')
-subplot(4,1,4)
-plot(data3(1:l,si*(j-1)+1 : j*si)')
+% j=7
+% figure()
+% subplot(4,1,1)
+% plot(data_small1')
+% subplot(4,1,2)
+% plot(data_small2')
+% subplot(4,1,3)
+% plot(data_small3')
+% subplot(4,1,4)
+% plot(data1(1:l,2*N+si*(j-1)+1 : 2*N+j*si)')

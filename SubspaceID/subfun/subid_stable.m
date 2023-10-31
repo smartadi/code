@@ -132,6 +132,8 @@ if (ds_flag == 1);Uaux = u(1,1);else;Uaux = [];end
 % Compute the R factor
 if isempty(AUXin)
   Y = blkhank(y/sqrt(j),2*i,j); 	% Output block Hankel
+  % display("Hankel sze")
+  % size(Y)
   mydisp(sil,'      Computing ... R factor');
   if (ds_flag == 1)
     U = blkhank(u/sqrt(j),2*i,j); 	% Input block Hankel

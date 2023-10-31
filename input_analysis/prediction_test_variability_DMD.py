@@ -28,9 +28,7 @@ spat  = np.load(path + '/blue/svdSpatialComponents.npy')
 
 cam_times = np.load(path + '/corr/svdTemporalComponents_corr.timestamps.npy')
 
-print(cam_times.shape)
-print(cam_times[0])
-print(cam_times[-1])
+
 # cam_times_short = cam_times[::2]
 # print("camera times")
 # print(cam_times_short.shape)
@@ -52,14 +50,15 @@ print(r)
 # normalising only r modes hides features
 #tempn = temp[:r,:]/np.linalg.norm(temp[:r,:])
 
-'''
+
 a = np.linalg.norm(temp[:,:],2,0)
 print(len(a))
 tempn = temp[:,:]/a
 print(tempn.shape)
 print(np.linalg.norm(tempn[:,0]))
-print(np.linalg.norm(tempn[0,:]))
+print(np.linalg.norm(tempn[:,5000]))
 
+'''
 nt = 1000
 
 train_size = int(15/dt)
@@ -304,3 +303,83 @@ axs[4].plot(tempn[:5,30000:31000].T)
 axs[5].plot(tempn[:5,40000:41000].T)
 plt.show()
 '''
+
+
+face_proc = np.load(path + '/face_proc.npy', allow_pickle=True).item()
+yrange = face_proc['rois'][0]['yrange_bin']
+xrange = face_proc['rois'][0]['xrange_bin']
+mean = face_proc['avgframe'][0]
+
+motTemp = face_proc['motSVD'][1]
+motSpat = face_proc['motMask_reshape'][1]
+
+# print(motSpat.shape)
+# print(motTemp.shape)
+
+# print(mean.shape)
+
+# print(xrange.shape)
+# print(yrange.shape)
+
+r=10  
+motTempr = motTemp[::2,:r]
+
+
+motTempf = motTemp[::2,:]
+
+
+motion = face_proc['motion'][1]
+motions = motion[::2]
+
+
+print(face_proc.keys())
+
+print(motion)
+
+# plt.plot(motions)
+# plt.show
+
+# plt.plot(motTempr)
+# plt.show
+
+
+motTempn = motTempr/np.linalg.norm(motTempr,2,0)
+motTempfn = motTempf/np.linalg.norm(motTempf,2,0)
+
+plt.plot(motTempr[:1000,:])
+plt.show
+
+plt.plot(motions[:1000])
+plt.show
+
+
+fig, ax = plt.subplots(figsize=(9, 6))
+ax.plot(motTempn[4000:5000,:])
+ax.set(xlabel='time',ylabel = 'wf')
+#ax.vlines(x = laser_on[:res],ymin = -0.02, ymax = 0.02, color = 'k', label = 'input')
+plt.show()
+
+fig, ax = plt.subplots(figsize=(9, 6))
+ax.plot(motions[4000:5000])
+ax.set(xlabel='time',ylabel = 'wf')
+#ax.vlines(x = laser_on[:res],ymin = -0.02, ymax = 0.02, color = 'k', label = 'input')
+plt.show()
+
+
+fig, ax = plt.subplots(figsize=(9, 6))
+ax.plot(motTempfn[4000:5000,:])
+ax.set(xlabel='time',ylabel = 'wf')
+#ax.vlines(x = laser_on[:res],ymin = -0.02, ymax = 0.02, color = 'k', label = 'input')
+plt.show()
+
+
+fig, ax = plt.subplots(figsize=(9, 6))
+ax.plot(tempn[:10,4000:5000  ].T)
+ax.set(xlabel='time',ylabel = 'wf')
+#ax.vlines(x = laser_on[:res],ymin = -0.02, ymax = 0.02, color = 'k', label = 'input')
+plt.show()
+
+
+
+
+
