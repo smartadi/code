@@ -427,6 +427,7 @@ title('one window continuous stable')
 % plot(data_small1')
 % subplot(4,1,2)
 % plot(data_small2')
+
 % subplot(4,1,3)
 % plot(data_small3')
 % subplot(4,1,4)

@@ -13,7 +13,7 @@ print("read data")
 
 
 
-# spat  = np.load(path + '/blue/svdSpatialComponents.npy')
+spat  = np.load(path + '/blue/svdSpatialComponents.npy')
 
 
 # temp  = np.load(path + '/corr/svdTemporalComponents_corr.npy').T
@@ -35,11 +35,11 @@ print(tempno.shape)
 print(spato.shape)
 
 
-'''
+
 spatn = spat.transpose(2,0,1).reshape(560*560,-1)
 print(spatn.shape)
 m =np.mean(spatn,0)
-
+'''
 # print(m)
 print(m.shape)
 

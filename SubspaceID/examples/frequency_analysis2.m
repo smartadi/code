@@ -25,11 +25,10 @@ data1=Vv';
 N=10000;
 %%
 n = 5;
-l=n;
+l = n;
 Ts = 1000;
-data_small = data1(1:l,1:Ts);
-
-nn = 10;
+data_small = data1(2:l,1:Ts);
+nn = 8
 
 %   We will now identify this system from the data y 
 %   with the subspace identification algorithm: subid
@@ -77,14 +76,14 @@ Ds=[];
 D=[];
 for i = 1:1:Q
     % data = data1(1:l,Ts*(i-1)+1 : i*Ts);
-    data = data1(1:l,Ts*(i-1)+1 : i*Ts);
+    data = data1(2:l,Ts*(i-1)+1 : i*Ts);
 
     AUX=[];
     [A,du1,C,du2,K,R,AUX] = subid(data,[],p,nn,[],[],1);
 
     [As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data,[],p,nn,AUX,'sv');
 
-    % As = As - Ks*Cs;
+    %As = As - Ks*Cs;
 
     [E,V] = eig(As)
     
@@ -92,11 +91,7 @@ for i = 1:1:Q
 
     D = [D,eig(A)];
     Ds = [Ds,eig(As)];
-
-   
-
-
-% eig(A)
+eig(A)
 end
 %%
 close all;
@@ -104,13 +99,7 @@ figure()
 plot(Ds,'or'); hold on;
 axis([-1 1 -1 1])
 title('stable eigenvalues')
-
-
-figure()
-plot(D,'or'); hold on;
-axis([-1 1 -1 1])
-title('unstable eigenvalues')
-cDs = (Ds-1)/dt;
+cDs = Ds/dt;
 cD = D/dt;
 
 t= 1:1:Q;
@@ -120,17 +109,8 @@ plot(t,abs(imag(cDs)),'or'); hold on;
 title('Stable continuous time eigenvalues')
 
 figure()
-plot(t,abs(imag(cD)),'ob'); hold on;
-title('unstable continuous')
-
-
-figure()
-plot(cDs,'or'); hold on;
-title('Stable continuous time eigenvalues')
-
-figure()
-plot(cD,'ob'); hold on;
-title('unstable continuous')
+plot(t,abs(imag(cD)),'or'); hold on;
+title('Stable continuous')
 
 %% power spectrum
 % close all;
@@ -215,14 +195,17 @@ title("fft Spectrum in the Positive and Negative Frequencies")
 xlabel("f (Hz)")
 ylabel("|fft(X)|")
 
+figure()
+plot(tt,a(L/2+1:end,1),"LineWidth",3)
+title("fft Spectrum in the Positive and Negative Frequencies")
+xlabel("f (Hz)")
+ylabel("|fft(X)|")
+
+figure()
+plot(tt,a(L/2+1:end,2:end),"LineWidth",3)
+title("fft Spectrum in the Positive and Negative Frequencies")
+xlabel("f (Hz)")
+ylabel("|fft(X)|")
+
 %%
-
-
-% T = logm([As,zeros(nn,1);zeros(1,nn),1]);
-% T(:,end) = [];
-% T(end,:) = [];
-% 
-% T = T/dt;
-% 
-% eig(T)
 
