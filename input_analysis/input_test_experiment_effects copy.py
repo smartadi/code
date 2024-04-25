@@ -291,11 +291,6 @@ plt.show()
 
 
 
-
-
-
-
-
 face_proc = np.load(path + '/face_proc.npy', allow_pickle=True).item()
 yrange = face_proc['rois'][0]['yrange_bin']
 xrange = face_proc['rois'][0]['xrange_bin']

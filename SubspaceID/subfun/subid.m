@@ -65,6 +65,7 @@
 
 function [A,B,C,D,K,Ro,AUX,ss] = subid(y,u,i,n,AUXin,W,sil);
 
+
 warning off
   
 if (nargin < 7);sil = 0;end
@@ -79,10 +80,11 @@ if (nargin < 4);n = [];end
 if (nargin < 5);AUXin = [];end
 
 % Check if its deterministic or stochastic ID
-if isempty(u);   ds_flag = 2; 		% Stochastic
-else;           ds_flag = 1; 		% Deterministic
-end  
-
+if (isempty(u))
+    ds_flag = 2 		% Stochastic
+else           
+    ds_flag = 1 		% Deterministic
+end 
 % Give W its default value
 if (nargin < 6);W = [];end
 if isempty(W)

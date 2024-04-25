@@ -5,18 +5,16 @@ digits(8);
 s = 5;
 rng(s);
 % lamTda = - 0 - 5i;
-dt = 0.01;
+dt = 1/35;
 t = 0:dt:50;
 
-%% Generate Tasis
+%% Generate Basis
 
 n = 20;
 V = 0.5*ones(n,n) - rand(n);
 rank(V);
 
 V = V./vecnorm(V,2,1);
-
-% V(:,1)'*V(:,2);
 
 %% Gram Schmidt
 
@@ -46,7 +44,7 @@ T = 0.1*(0.5 - rand(n)); % random matrix
 %a = rand(n/2,1,"like",1i);
 delta = -0.1*rand(n/2,1); 
 
-% for staTle dynamics
+% for stable dynamics
 a = delta + (rand(n/2,1)-.5)*1i;
 b = conj(a);
 
@@ -61,6 +59,7 @@ d = sort(d);
 Ds = diag(d);
 
 D = diag(sort([a0;b0]));
+%D = diag(sort([a;b]));
 
 %% New system
 x0 = 0.5 - rand(n,1);
@@ -82,8 +81,8 @@ WF = WF-0.5;
 [Vmm Dmm] = cdf2rdf(Q1,Dmix);
 
 
-Anew = T*Dnn*inv(T);
-Amix = T*Dmm*inv(T);
+% Anew = T*Dnn*inv(T);
+% Amix = T*Dmm*inv(T);
 
 Anew = Q1*Dnn*Q1';
 Amix = Q1*Dmm*Q1';
@@ -92,7 +91,7 @@ Amix = Q1*Dmm*Q1';
 [Un,Dn] = eig(Anew);
 [Um,Dm] = eig(Amix);
 
-
+Adt = expm(Anew*dt);
 Amdt = expm(Amix*dt);
 
 eig(Anew);
@@ -124,31 +123,7 @@ end
     ywf = WF*xpf;
     ynp = NP*xpf;
     
-% close all;    
-% figure()
-% plot(t,xp);
-% title("latent dynamics")
-% 
-% figure()
-% plot(t,xpf);
-% title("latent dynamics time scaled")
-% 
-% figure()
-% plot(t,ywf);
-% title("WF output")
-% 
-% figure()
-% plot(t,ynp);
-% title("NP output")
-% 
-% figure()
-% plot(t,xpu);
-% title("latent dynamics via modes")
-% 
-% figure()
-% plot(t,p);
-% title("latent dynamics via modes discrete")
-% title("NP output")
+
 
 %% Add high freq noise
 close all;
@@ -160,13 +135,12 @@ V =[];
 f = 1*rand(n,1);
 a = 0.01;
 amp = a*rand(n,1);
-G = 0.01*(0.5-rand(n));
+G = 0.1*(0.5-rand(n));
 % G = eye(n);
 phi = 3.14*rand(n,1);
 k=0;
 
 for i = t
-    
 %     phi = 1;
 %     ff = f.*sin(phi*i);
 % 
@@ -195,27 +169,33 @@ ywf = WF*xpf + normrnd(0,0.05,n/2,length(t));
 ynp = NP*xpf + normrnd(0,0.05,n/2,length(t));
 
 
-%%
+%
 close all
 figure()
 plot(t,xpf);
-title("latent dynamics time scaled")
+title("latent dynamics noisy")
+
+% figure()
+% plot(t,ywf);
+% title("WF output")
+% 
+% figure()
+% plot(t,ynp);
+% title("NP output")
+% 
+% figure()
+% plot(t,V)
+% title("noise")
+
+% figure()
+% plot(t,xp);
+% title("latent dynamics no noise")
 
 figure()
-plot(t,ywf);
-title("WF output")
-
-figure()
-plot(t,ynp);
-title("NP output")
-
-figure()
-plot(t,V)
-title("noise")
-
-figure()
-plot(t,xp);
+plot(t,p);
 title("latent dynamics no noise")
+
+
 
 %% Save Data
 
@@ -266,4 +246,14 @@ title("latent dynamics no noise")
 % close(writerOTj);
 %%
 figure()
-plot(D,'bo')
+plot(D,'bo');hold on
+plot(eigs(Amix),'ro');hold on
+
+%%
+
+figure()
+plot(eig(Adt),'bo');hold on
+plot(eig(Amdt),'ro');hold on
+
+%%
+

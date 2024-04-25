@@ -147,76 +147,76 @@ print(pred_id[0])
 print(laser_on[[idx_arr[0,0]]])
 
 
-# N = test_size
-# Hdmd = HankelDMD_Predictor(400,10)
-# n=50
-# Hdmd.fit(train_id[:n,:].T)
+N = test_size
+Hdmd = HankelDMD_Predictor(400,10)
+n=50
+Hdmd.fit(train_id[:n,:].T)
 
-# #R = Hdmd.predict(N, reconstruct=True)
-# R = Hdmd.predict(N, reconstruct=False)
-
-
-# print(train_id.shape)
-# print(test_id.shape)
-# print(R.shape)
+#R = Hdmd.predict(N, reconstruct=True)
+R = Hdmd.predict(N, reconstruct=False)
 
 
-# fig, ax = plt.subplots(figsize=(9, 6))
-# ax.plot(time_id,train_id[:r,:].T)
-# ax.plot(time_id,R[:train_size-1,:r])
-# ax.set(xlabel='time',ylabel = 'wf')
-# #ax.vlines(x = laser_on[:res],ymin = -0.02, ymax = 0.02, color = 'k', label = 'input')
-# plt.show()
-
-# r=5
-# fig, ax = plt.subplots(figsize=(9, 6))
-# ax.plot(pred_id,test_id[:r,:].T)
-# ax.plot(pred_id[:-1],R[:,:r])
-# ax.set(xlabel='time',ylabel = 'wf')
-# #ax.vlines(x = laser_on[:res],ymin = -0.02, ymax = 0.02, color = 'k', label = 'input')
-# plt.show()
+print(train_id.shape)
+print(test_id.shape)
+print(R.shape)
 
 
-# # print(train_id[:r,-2])
-# # print(train_id[:r,-1])
-# # print(test_id[:r,0])
-# # print(R[0,:r])
+fig, ax = plt.subplots(figsize=(9, 6))
+ax.plot(time_id,train_id[:r,:].T)
+ax.plot(time_id,R[:train_size-1,:r])
+ax.set(xlabel='time',ylabel = 'wf')
+#ax.vlines(x = laser_on[:res],ymin = -0.02, ymax = 0.02, color = 'k', label = 'input')
+plt.show()
+
+r=5
+fig, ax = plt.subplots(figsize=(9, 6))
+ax.plot(pred_id,test_id[:r,:].T)
+ax.plot(pred_id[:-1],R[:,:r])
+ax.set(xlabel='time',ylabel = 'wf')
+#ax.vlines(x = laser_on[:res],ymin = -0.02, ymax = 0.02, color = 'k', label = 'input')
+plt.show()
 
 
-# print(temp[:,0].T@temp[:,1].T)
-# print(temp[:,0].shape)
-# print(temp[0,:].shape)
-# print(temp[:,:].shape)
-# print(temp[0,:].T@temp[1,:])
-# print(np.dot(temp[0,:],temp[0,:]))
+# print(train_id[:r,-2])
+# print(train_id[:r,-1])
+# print(test_id[:r,0])
+# print(R[0,:r])
 
 
+print(temp[:,0].T@temp[:,1].T)
+print(temp[:,0].shape)
+print(temp[0,:].shape)
+print(temp[:,:].shape)
+print(temp[0,:].T@temp[1,:])
+print(np.dot(temp[0,:],temp[0,:]))
 
 
 
 
-# print(idx_arr)
-# print(upos)
-
-# print(laser_on[idx_arr[0,:]])
-
-# # group
-# print(laser_on[idx_arr[0,0]] - cam_times_short[0])
-# nt = int((laser_on[idx_arr[0,0]] - cam_times_short[0])/dt)
-# print(nt)
-# print(cam_times_short[int(nt)-2])
-# print(cam_times_short[int(nt)-1])
-# print(cam_times_short[int(nt)])
-# print(cam_times_short[int(nt)+1])
 
 
+print(idx_arr)
+print(upos)
 
-# nt = (laser_on[idx_arr[0,1]] - cam_times_short[0])/dt
-# print(nt)
-# print(cam_times_short[int(nt)-2])
-# print(cam_times_short[int(nt)-1])
-# print(cam_times_short[int(nt)])
-# print(cam_times_short[int(nt)+1])
+print(laser_on[idx_arr[0,:]])
+
+# group
+print(laser_on[idx_arr[0,0]] - cam_times_short[0])
+nt = int((laser_on[idx_arr[0,0]] - cam_times_short[0])/dt)
+print(nt)
+print(cam_times_short[int(nt)-2])
+print(cam_times_short[int(nt)-1])
+print(cam_times_short[int(nt)])
+print(cam_times_short[int(nt)+1])
+
+
+
+nt = (laser_on[idx_arr[0,1]] - cam_times_short[0])/dt
+print(nt)
+print(cam_times_short[int(nt)-2])
+print(cam_times_short[int(nt)-1])
+print(cam_times_short[int(nt)])
+print(cam_times_short[int(nt)+1])
 
 
 

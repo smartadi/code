@@ -5,12 +5,12 @@ clc;
 dt = 0.0285;
 t = 0:dt:dt*1000;
 
+%% read data from server
 path = "/run/user/1001/gvfs/smb-share:server=steinmetzsuper1.biostr.washington.edu,share=data/Subjects/ZYE_0069/2023-10-03/1";
 upath = '/corr/svdSpatialComponents_ortho.npy';
 upath = append(path,upath);
 vpath = '/corr/svdTemporalComponents_ortho.npy';
 vpath = append(path,vpath);
-
 
 Uu = readUfromNPY(upath);
 Vv = readVfromNPY(vpath);
@@ -22,8 +22,8 @@ Vv = Vv./vecnorm(Vv,2,2);
 disp('loading WF PCA projections')
 
 data1=Vv';
-N=10000;
-%%
+N=10000 ;
+%% S
 n = 5;
 l = n;
 Ts = 1000;
@@ -39,7 +39,7 @@ nn = 8
 
 %   Say we don't know the order, but think it is maximally equal to 10.
 %   
-       max_order = 10;
+       max_order = 100;
 %   
 %   As described in the help of subid we can determine "i" as follows:
 %   
@@ -69,6 +69,7 @@ legend('unstable','stable')
 
 %%
 
+
 Q = TT/Ts;
 % Q = 5.5;
 Vd = zeros(nn,nn,floor(Q));
@@ -85,7 +86,7 @@ for i = 1:1:Q
 
     %As = As - Ks*Cs;
 
-    [E,V] = eig(As)
+    [E,V] = eig(As);
     
     Vd(:,:,i) = V;
 
@@ -94,23 +95,23 @@ for i = 1:1:Q
 eig(A)
 end
 %%
-close all;
-figure()
-plot(Ds,'or'); hold on;
-axis([-1 1 -1 1])
-title('stable eigenvalues')
-cDs = Ds/dt;
-cD = D/dt;
-
-t= 1:1:Q;
-
-figure()
-plot(t,abs(imag(cDs)),'or'); hold on;
-title('Stable continuous time eigenvalues')
-
-figure()
-plot(t,abs(imag(cD)),'or'); hold on;
-title('Stable continuous')
+% close all;
+% figure()
+% plot(Ds,'or'); hold on;
+% axis([-1 1 -1 1])
+% title('stable eigenvalues')
+% cDs = Ds/dt;
+% cD = D/dt;
+% 
+% t= 1:1:Q;
+% 
+% figure()
+% plot(t,abs(imag(cDs)),'or'); hold on;
+% title('Stable continuous time eigenvalues')
+% 
+% figure()
+% plot(t,abs(imag(cD)),'or'); hold on;
+% title('Stable continuous')
 
 %% power spectrum
 % close all;
@@ -207,5 +208,76 @@ title("fft Spectrum in the Positive and Negative Frequencies")
 xlabel("f (Hz)")
 ylabel("|fft(X)|")
 
-%%
+%% Moving window
+LL = 1000
+% Ts;
+% Q = 5.5;
+Vd = zeros(nn,nn,floor(Q));
+Ds=[];
+D=[];
+% shift by sT data points
+sT = 10;
 
+for i = 1:LL
+    
+    data = data1(1:l,sT*(i-1)+1 : sT*(i-1)+Ts);
+
+    AUX=[];
+    [A,du1,C,du2,K,R,AUX] = subid(data,[],p,nn,[],[],1);
+
+    [As,du1s,Cs,du2s,Ks,Rs] = subid_stable(data,[],p,nn,AUX,'sv');
+
+    %As = As - Ks*Cs;
+
+    [E,V] = eig(As)
+
+    D = [D,eig(A)];
+    Ds = [Ds,eig(As)];
+end
+
+%%
+% close all;
+% figure()
+% plot(Ds,'or'); hold on;
+% axis([-1 1 -1 1])
+% title('stable eigenvalues')
+% 
+% 
+% figure()
+% plot(D,'or'); hold on;
+% axis([-1 1 -1 1])
+% title('unstable eigenvalues')
+% cDs = (Ds-1)/dt;
+% cD = D/dt;
+% 
+% t= 1:1:LL;
+% 
+% figure()
+% plot(t,abs(imag(cDs)),'or'); hold on;
+% title('Stable continuous time eigenvalues')
+% 
+% figure()
+% plot(t,abs(imag(cD)),'ob'); hold on;
+% title('unstable continuous')
+% 
+% 
+% figure()
+% plot(cDs,'or'); hold on;
+% title('Stable continuous time eigenvalues')
+% 
+% figure()
+% plot(cD,'ob'); hold on;
+% title('unstable continuous')
+
+%%
+CDs = log(Ds)/dt;
+CD = log(D)/dt;
+
+close all;
+figure()
+plot(t,abs(imag(CDs)),'or'); hold on;
+title('Stable discrete time frequency')
+
+figure()
+plot(t,abs(imag(CD)),'ob'); hold on;
+title('unstable')

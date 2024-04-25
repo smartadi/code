@@ -64,7 +64,7 @@ if (nargin < 2);error('sto_alt needs at least two arguments');end
 if (nargin < 3);n = [];end
 if (nargin < 4);AUXin = [];end
 if (nargin < 5);W = [];end
-if (W == []);W = 'CVA';end
+%if (W == []);W = 'CVA';end
 
 
 % Turn the data into row vectors and check

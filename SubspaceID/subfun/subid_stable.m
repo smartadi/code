@@ -307,7 +307,6 @@ C = gam(1:l,:);
 sol = [A;C];
 res = Lhs - sol*Rhs; 			% Residuals
 
-size(res)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   Recompute gamma from A and C
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

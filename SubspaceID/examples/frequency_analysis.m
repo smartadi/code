@@ -65,9 +65,6 @@ plot(dd,'ob');hold on
 plot(ds,'or');
 legend('unstable','stable')
 
-
-
-
 %%
 
 Q = TT/Ts;
@@ -87,6 +84,8 @@ for i = 1:1:Q
     % As = As - Ks*Cs;
 
     [E,V] = eig(As)
+
+    
     
     Vd(:,:,i) = V;
 
@@ -112,6 +111,10 @@ axis([-1 1 -1 1])
 title('unstable eigenvalues')
 cDs = (Ds-1)/dt;
 cD = D/dt;
+
+
+lcD = log(D/dt);
+lcDs  = log(Ds)/dt;
 
 t= 1:1:Q;
 
@@ -139,7 +142,7 @@ title('unstable continuous')
 L=10000;
 S = Vv(1:L,1:10);
 
-Fs = 35
+Fs = 35;
 % 
 % f = Fs/L*(0:(L-1));
 % 
@@ -217,12 +220,34 @@ ylabel("|fft(X)|")
 
 %%
 
-
+clc;
 % T = logm([As,zeros(nn,1);zeros(1,nn),1]);
 % T(:,end) = [];
 % T(end,:) = [];
-% 
-% T = T/dt;
-% 
-% eig(T)
+
+T    = logm(As)
+T = T/dt;
+eig(As)
+eig(T)
+expm(T*dt)
+As
+%% recomputing eigs with d = ln(c)/dt
+t= 1:1:Q;
+
+figure()
+plot(t,abs(imag(lcDs)),'or'); hold on;
+title('Stable continuous time eigenvalues')
+
+figure()
+plot(t,abs(imag(lcD)),'ob'); hold on;
+title('unstable continuous')
+
+
+figure()
+plot(lcDs,'or'); hold on;
+title('Stable continuous time eigenvalues')
+
+figure()
+plot(lcD,'ob'); hold on;
+title('unstable continuous')
 
