@@ -115,3 +115,8 @@ ax.plot3D(embedding[8000:10000,0].T,embedding[8000:10000,1].T,embedding[8000:100
 plt.show()
 
 
+
+fig = plt.figure(figsize = (12,10))
+ax = plt.axes(projection='3d')
+ax.plot3D(embedding[:2000,0].T,embedding[:2000,1].T,embedding[:2000,2].T)
+plt.show()

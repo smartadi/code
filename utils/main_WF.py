@@ -8,8 +8,29 @@ from numba import jit, prange, float32
 import cv2
 
 # import WF data (pre processed)
-wf_temp_data = np.load('../data/svdTemporalComponents_corr.npy')          #  V^T
-wf_space_data = np.load('../data/svdSpatialComponents.npy')               #  US 500
+pathAB32 = '/run/user/1001/gvfs/smb-share:server=sahale.biostr.washington.edu,share=data/Subjects/AB_0032/2024-03-14/1'
+pathAL14 = '/run/user/1001/gvfs/smb-share:server=sahale.biostr.washington.edu,share=data/Subjects/AL_0014/2022-08-15/1'
+
+path = pathAL14
+
+#input = np.load(path + '/lightCommand.raw.npy')
+#print(input.shape)
+
+#t_stamps = np.load(path + '/lightCommand.timestamps_Timeline.npy')
+#print(t_stamps)
+
+
+
+
+# temp  = np.load(path + '/corr/svdTemporalComponents_corr.npy').T
+# print("dynamics shape")
+# print(temp.shape)
+
+# spat  = np.load(path + '/blue/svdSpatialComponents.npy')
+# print("Spatial shape")
+# print(spat.shape)
+wf_temp_data = temp  = np.load(path + '/corr/svdTemporalComponents_corr.npy')          #  V^T
+wf_space_data = np.load(path + '/blue/svdSpatialComponents.npy')               #  US 500
 
 print(np.shape(wf_temp_data))
 print(wf_temp_data.dtype)
@@ -110,17 +131,17 @@ data = np.zeros((100*100,N),dtype='int32')
 #data = np.empty((240*240,N),dtype='int')
 
 
-#for i in range(10):
-for i in range(N):
-    C = np.zeros((560 * 560, 1))
-    cc = mm(USr,VT[:,i],C)
-    im = cc.astype(int)
-    ims = im.reshape(560,560)
-    imr = cv2.resize(ims, (100, 100),interpolation=cv2.INTER_LINEAR_EXACT)
-    #img_normalized = cv2.normalize(imr, None, 0, 1.0, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-    d = imr.flatten('F')
-    data[:,i] = d.T
-    print(i)
+# #for i in range(10):
+# for i in range(N):
+#     C = np.zeros((560 * 560, 1))
+#     cc = mm(USr,VT[:,i],C)
+#     im = cc.astype(int)
+#     ims = im.reshape(560,560)
+#     imr = cv2.resize(ims, (100, 100),interpolation=cv2.INTER_LINEAR_EXACT)
+#     #img_normalized = cv2.normalize(imr, None, 0, 1.0, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+#     d = imr.flatten('F')
+#     data[:,i] = d.T
+#     print(i)
 
 
 
@@ -134,9 +155,60 @@ print(data.max())
 
 #images = USr @ VT[:, 0:100]
 
-plt.imshow(ims)
-plt.show()
+
+
+
+i=20000
+C = np.zeros((560 * 560, 1))
+cc = mm(USr,VT[:,i],C)
+im = cc.astype(int)
+ims = im.reshape(560,560)
+imr = cv2.resize(ims, (100, 100),interpolation=cv2.INTER_LINEAR_EXACT)
+#img_normalized = cv2.normalize(imr, None, 0, 1.0, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+
+print(i)
 
 plt.imshow(imr)
 plt.show()
 
+
+i=30000
+C = np.zeros((560 * 560, 1))
+cc = mm(USr,VT[:,i],C)
+im = cc.astype(int)
+ims = im.reshape(560,560)
+imr = cv2.resize(ims, (100, 100),interpolation=cv2.INTER_LINEAR_EXACT)
+#img_normalized = cv2.normalize(imr, None, 0, 1.0, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+
+print(i)
+
+plt.imshow(imr)
+plt.show()
+
+
+i=40000
+C = np.zeros((560 * 560, 1))
+cc = mm(USr,VT[:,i],C)
+im = cc.astype(int)
+ims = im.reshape(560,560)
+imr = cv2.resize(ims, (100, 100),interpolation=cv2.INTER_LINEAR_EXACT)
+#img_normalized = cv2.normalize(imr, None, 0, 1.0, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+
+print(i)
+
+plt.imshow(imr)
+plt.show()
+
+
+i=50000
+C = np.zeros((560 * 560, 1))
+cc = mm(USr,VT[:,i],C)
+im = cc.astype(int)
+ims = im.reshape(560,560)
+imr = cv2.resize(ims, (100, 100),interpolation=cv2.INTER_LINEAR_EXACT)
+#img_normalized = cv2.normalize(imr, None, 0, 1.0, cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+
+print(i)
+
+plt.imshow(imr)
+plt.show()

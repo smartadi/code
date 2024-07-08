@@ -57,6 +57,7 @@ l = dims;
 %       must be an integer
         i = 2*(max_order)/l;
 %
+N= 16
 
 %
 %   The subspace algorithms is now e asily started.

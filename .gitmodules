@@ -1,3 +1,6 @@
 [submodule "Matt"]
 	path = Matt
 	url = https://github.com/msw1age/LND_notebooks.git
+[submodule "TD_AE"]
+	path = TD_AE
+	url = https://github.com/msw1age/TD_AE.git

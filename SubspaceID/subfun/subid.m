@@ -173,7 +173,9 @@ if isempty(AUXin) | (Wflag == 1)
   if (ds_flag == 1)
     Ru  = R(m*i+1:2*m*i,1:mi2); 	% Future inputs
     % Perpendicular Future outputs 
-    Rfp = [Rf(:,1:mi2) - (Rf(:,1:mi2)/Ru)*Ru,Rf(:,mi2+1:2*(m+l)*i)]; 
+    Rfp = [Rf(:,1:mi2) - (Rf(:,1:mi2)/Ru)*Ru,Rf(:,mi2+1:2*(m+l)*i)];   
+
+    
     % Perpendicular Past
     Rpp = [Rp(:,1:mi2) - (Rp(:,1:mi2)/Ru)*Ru,Rp(:,mi2+1:2*(m+l)*i)]; 
   end
