@@ -19,3 +19,5 @@
 .venv
 .venv/
 input_analysis/*.npy
+
+*.mat
