@@ -97,4 +97,3 @@ pixelTuningCurveViewerSVD(U, V(:,1:end-1), t, stimStarts(1:end-1),events, [-1 1]
 
 %% sort
 
-for 

@@ -2,7 +2,7 @@ clc;
 close all;
 clear all;
 
-path = '/home/nimbus/Documents/Brain/data/wf/widefield/1/';
+path = '/home/nimbus/Documents/Brain/data/2024-08-04/temp/';
 
 directory_instance = dir(path);
 file_names = {directory_instance.name};
