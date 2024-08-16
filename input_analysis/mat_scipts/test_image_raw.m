@@ -5,6 +5,8 @@ clear all;
 
 path = '/home/nimbus/Documents/Brain/data/2024-08-04/temp/frame-';
 
+path2 = '/home/nimbus/Documents/Brain/data/AB_0032/2023-08-08/frame-';
+
 % directory_instance = dir(path);
 % file_names = {directory_instance.name};
 % file_names(1:2)=[];
@@ -32,18 +34,18 @@ out=out-2;
    
 %%
 
-% F = []
-% for i=1:out
-%     pathim=append(path,num2str(i-1));
-%     fileID = fopen(pathim,'r');
-%     A = fread(fileID,[560,560],'uint16')';
-%     G=[];
-%     for j = 1 :length(pixel)
-%         G = [G;A(pixel(j,1),pixel(j,2))];
-%     end
-%     i
-%     F = [F,G];
-% end
+F2 = []
+for i=1:out
+    pathim=append(path2,num2str(i-1));
+    fileID = fopen(pathim,'r');
+    A = fread(fileID,[560,560],'uint16')';
+    G=[];
+    for j = 1 :length(pixel)
+        G = [G;A(pixel(j,1),pixel(j,2))];
+    end
+    i
+    F2 = [F2,G];
+end
 
 
 %% pixelate
@@ -65,18 +67,18 @@ out=out-2;
 % end
 
 
-Fp=F;
-save('pixel_trial_0824.mat',"Fp");
+Fp2=F2;
+save('pixel_trial_080824.mat',"Fp2");
 %%load('pixel_raw.mat',"Fr");
 %%
 close all;
 
-Fb = F(:,1:2:end);
-Fv = F(:,2:2:end);
+Fb = F2(:,1:2:end);
+Fv = F2(:,2:2:end);
 
 
 figure()
-plot(F')
+plot(F2')
 
 
 figure
@@ -92,7 +94,7 @@ T=500
 
 close all
 figure()
-plot(F(:,t0:t0+2*T)')
+plot(F2(:,t0:t0+2*T)')
 
 
 figure
@@ -105,10 +107,11 @@ plot(Fv(:,t0:t0+T)')
 
 %%
 
-states = readmatrix('/home/nimbus/Documents/Brain/data/2024-08-04/data/states.csv');
+states = readmatrix('/home/nimbus/Documents/Brain/data/AB_0032/2023-08-08/states.csv');
 
 %%
-N=length(F);
+close all
+N=length(F2);
 
 sb = states(:,1:2:N);
 sv = states(:,2:2:N);
@@ -116,7 +119,8 @@ sv = states(:,2:2:N);
 figure()
 plot(states(1:N))
 
-
+%%
+close all
 figure()
 plot(sv)
 
@@ -126,9 +130,6 @@ plot(sb)
 close all
 figure
 plot(sb(:,t0:t0+T)')
-
-figure()
-plot(sv(:,t0:t0+T)')
 
 figure
 plot(Fb(6,t0:t0+T)')
