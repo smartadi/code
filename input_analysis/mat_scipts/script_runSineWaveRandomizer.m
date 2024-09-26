@@ -21,10 +21,10 @@ rate = s.Rate;
 n_trials = 250;
 
 max_amp = 2.5;
-min_amp = 0.1;
+min_amp = 0.5;
 
 max_dur = 2;
-min_dur = 0.1;
+min_dur = 1;
 
 galvoXPos = 0;
 galvoYPos = 0;
@@ -67,7 +67,7 @@ for i = 1:n_trials
 %     s.stop();
 
 end
-
+save('rand_inputs.mat',"laserDurs","laserAmps");
 %% 
 function waveform = genLaser(rate, laserAmp, laserDur, trialTimeSamps, delayTimeSamps, laserFreq)
     laserDurSamps = laserDur * rate;

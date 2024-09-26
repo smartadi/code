@@ -33,7 +33,7 @@ S = Vv1(1:ll,1:50000)' ;
 %%  pixel specific
 % time
 
-i=10000;
+i=1000;
 Im =  reshape(Uu*Vv1(:,i),560,560);
 
 %rank 10
