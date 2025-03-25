@@ -7,15 +7,22 @@ clc;
 dt = 0.0285;
 t = 0:dt:dt*1000;
 
-path = "/run/user/1001/gvfs/smb-share:server=steinmetzsuper1.biostr.washington.edu,share=data/Subjects/ZYE_0069/2023-10-03/1";
+mn = "ZYE_0069";
+td = "2023-10-03";
+en = 1; 
+serverRoot = expPath(mn, td, en)
+% path = "/run/user/1001/gvfs/smb-share:server=steinmetzsuper1.biostr.washington.edu,share=data/Subjects/";
 upath = '/corr/svdSpatialComponents_ortho.npy';
-upath = append(path,upath);
+upath = append(serverRoot,upath);
 vpath = '/corr/svdTemporalComponents_ortho.npy';
-vpath = append(path,vpath);
+vpath = append(serverRoot,vpath);
 
 
 Uu = readUfromNPY(upath);
 Vv1 = readVfromNPY(vpath);
+
+% Uu = readNPY(upath);
+% Vv1 = readNPY(vpath);
 
 [TT,dims]= size(Vv1);
 

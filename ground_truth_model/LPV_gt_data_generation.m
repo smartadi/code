@@ -116,6 +116,8 @@ V=[];
 
 xp=[x0];
 
+v = 
+
 for i = t(1:end-1)
     v   = [amp0 + (band.*sin(f*i+phi))];
     V = [V v];
@@ -152,6 +154,11 @@ plot(t(1:end-1),V)
 
 figure()
 plot(t,xp);
+title("latent dynamics noisy")
+%%
+C = ones(1,20);
+figure()
+plot(t,C*xp);
 title("latent dynamics noisy")
 
 %%

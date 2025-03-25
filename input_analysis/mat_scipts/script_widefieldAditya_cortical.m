@@ -8,8 +8,11 @@ addpath(genpath(fullfile(githubDir, 'npy-matlab'))) % kwikteam/npy-matlab
 
 %%
 
-mn = 'AB_0032'; td = '2024-06-25'; 
-en = 1;
+% mn = 'AB_0032'; td = '2024-06-25'; 
+% en = 1;
+
+mn = 'AL_0033'; td = '2025-02-12'; 
+en = 2;
 
 serverRoot = expPath(mn, td, en)
 
@@ -33,6 +36,7 @@ serverRoot = expPath(mn, td, en)
 nSV = 500;
 
 [U, V, t, mimg] = loadUVt(serverRoot, nSV);
+mimg = mimg';
 
 %% correlation map
 pixelCorrelationViewerSVD(U,V)
@@ -56,10 +60,23 @@ traces(tInd).lims = [0 5];
 movieWithTracesSVD(U, V, t, traces, [], []);
 
 %%
-
+close all
 % matchBlocks2Timeline(mn,td,[3 4],[])
+p=[380,280]
+i = 10000
+Im=0;
+P =  mimg(p(2),p(1))
+for j=1:500
+    Im = Im + U(:,:,j)'.*V(j,i);
+    
+    u = U(:,:,j)';
+    P = P + u(p(2),p(1)).*V(j,i);
+end
+Im = Im+mimg;
 
-
+imagesc(Im);hold on
+plot(p(1),p(2),'ok','LineWidth',2)
+impixelinfo
 %% 
 
 % dV = [zeros(size(V,1),1) diff(V,[],2)];
